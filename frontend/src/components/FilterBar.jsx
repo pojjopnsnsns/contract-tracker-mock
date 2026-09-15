@@ -1,0 +1,49 @@
+const STATUS_OPTIONS = [
+  'Upcoming renewal',
+  'Negotiation in progress',
+  'Renewed',
+  'Expired/Not renewed',
+];
+
+export default function FilterBar({ filters, onChange, serviceTypes, countries, onAddClick }) {
+  function set(field, value) {
+    onChange({ ...filters, [field]: value });
+  }
+
+  return (
+    <div className="filter-bar">
+      <input
+        type="text"
+        className="filter-search"
+        placeholder="ค้นหาชื่อสัญญา คู่สัญญา หรือหน่วยงาน..."
+        value={filters.search}
+        onChange={(e) => set('search', e.target.value)}
+      />
+
+      <select value={filters.status} onChange={(e) => set('status', e.target.value)}>
+        <option value="">สถานะทั้งหมด</option>
+        {STATUS_OPTIONS.map((s) => (
+          <option key={s} value={s}>{s}</option>
+        ))}
+      </select>
+
+      <select value={filters.serviceType} onChange={(e) => set('serviceType', e.target.value)}>
+        <option value="">ประเภทบริการทั้งหมด</option>
+        {serviceTypes.map((s) => (
+          <option key={s} value={s}>{s}</option>
+        ))}
+      </select>
+
+      <select value={filters.country} onChange={(e) => set('country', e.target.value)}>
+        <option value="">ประเทศทั้งหมด</option>
+        {countries.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+
+      <button className="btn btn--primary filter-bar__add" onClick={onAddClick}>
+        + เพิ่มสัญญาใหม่
+      </button>
+    </div>
+  );
+}
