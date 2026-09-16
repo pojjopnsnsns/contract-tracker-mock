@@ -472,7 +472,7 @@ button {
 /* Wrap long values within their column width instead of stretching the row
    or truncating with "...". table-layout: fixed on .contracts-table already
    caps the column width via <colgroup>, so normal white-space just wraps. */
-.cell-clip {
+.contracts-table td.cell-clip {
   white-space: normal;
   overflow-wrap: break-word;
   word-break: break-word;
