@@ -3,7 +3,7 @@ const NAV_ITEMS = [
   { id: 'contracts', icon: '☰', label: 'รายการสัญญา' },
 ];
 
-export default function Sidebar({ activePage, onNavigate }) {
+export default function Topbar({ activePage, onNavigate }) {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">

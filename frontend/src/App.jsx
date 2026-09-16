@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback, Suspense, lazy } from 'react';
 import { api } from './api.js';
-import Sidebar from './components/Sidebar.jsx';
+import Topbar from './components/Topbar.jsx';
 import FilterBar from './components/FilterBar.jsx';
 import ContractsTable from './components/ContractsTable.jsx';
 import ContractFormModal from './components/ContractFormModal.jsx';
@@ -114,7 +114,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar activePage={page} onNavigate={setPage} />
+      <Topbar activePage={page} onNavigate={setPage} />
 
       <div className="app">
         <header className="app-header">

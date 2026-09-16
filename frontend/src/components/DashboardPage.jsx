@@ -2,6 +2,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 import SummaryStrip from './SummaryStrip.jsx';
+import TopExpiringList from './TopExpiringList.jsx';
+import CountryRankList from './CountryRankList.jsx';
 
 const ALERT_COLORS = {
   overdue: '#ff5b5b',
@@ -80,18 +82,9 @@ export default function DashboardPage({ contracts, onCardClick }) {
           </ResponsiveContainer>
         </div>
 
-        <div className="chart-card chart-card--wide">
-          <h3 className="chart-card__title">จำนวนสัญญาตามประเทศ (สูงสุด 10 อันดับ)</h3>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={byCountry} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eceefa" />
-              <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#6c5dd3" radius={[0, 6, 6, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <TopExpiringList contracts={contracts} />
+
+        <CountryRankList data={byCountry} />
       </div>
     </div>
   );
