@@ -93,29 +93,38 @@ via the LINE Messaging API. It's a no-op until configured:
 3. It runs automatically at 08:00 server time, or trigger it manually:
    `POST http://localhost:4000/api/notify/run-now`.
 
-## Email renewal notifications (optional)
+## Email renewal notifications via Gmail (optional)
 
-Same daily digest, sent as an HTML email via any standard SMTP server -
-a company mail relay, Gmail with an app password, or a transactional
-provider's SMTP endpoint (SendGrid/SES/etc). No-op until configured:
+Same daily digest as LINE, sent as an HTML email through your Gmail account.
+No-op until configured.
 
-1. In `docker-compose.yml`'s backend `environment:` block (or as OS env
-   vars if running without Docker), set:
-   - `SMTP_HOST` - your mail server's hostname
-   - `SMTP_PORT` - usually `587` (STARTTLS) or `465` (implicit TLS)
-   - `SMTP_SECURE` - `true` only if using port 465, otherwise `false`
-   - `SMTP_USER` / `SMTP_PASS` - leave blank if your relay allows
-     unauthenticated mail from trusted IPs (common for internal
-     on-prem relays)
-   - `SMTP_FROM` - the From address (defaults to `SMTP_USER` if unset)
-   - `ALERT_EMAIL_TO` - one or more recipient addresses, comma-separated
-2. It runs on the same 08:00 schedule and the same manual trigger as LINE
-   above - both fire together from one `POST /api/notify/run-now` call,
-   and each only actually sends if its own env vars are set.
+Gmail requires an **App Password** instead of your normal login password
+(regular passwords are rejected by SMTP once 2-Step Verification is on,
+which Google requires for App Passwords to even be available):
 
-If AEROTHAI has an internal SMTP relay (common for on-prem mail systems),
-that's usually the simplest option - no external account or app password
-needed, just the relay's hostname and port from your mail admin.
+1. Turn on **2-Step Verification** on the Gmail account, if not already:
+   https://myaccount.google.com/signinoptions/two-step-verification
+2. Generate an App Password: https://myaccount.google.com/apppasswords
+   - App name: anything, e.g. "Contract Tracker"
+   - Copy the 16-character password it shows (spaces don't matter)
+3. In `docker-compose.yml`'s backend `environment:` block, fill in:
+   ```yaml
+   - SMTP_USER=youraddress@gmail.com
+   - SMTP_PASS=the16charapppassword
+   - ALERT_EMAIL_TO=recipient@example.com   # comma-separate multiple addresses
+   ```
+   `SMTP_HOST`/`SMTP_PORT`/`SMTP_SECURE` are already set correctly for Gmail
+   - leave those as-is. `SMTP_FROM` can stay blank; Gmail sends from
+   `SMTP_USER` regardless (it rejects a different From address unless
+   that address is added as a verified "Send As" alias in Gmail settings).
+4. Rebuild so the new env values take effect: `docker compose up --build`
+5. It runs automatically at 08:00 server time, or trigger it manually:
+   `POST http://localhost:4000/api/notify/run-now`.
+
+**If mail doesn't arrive:** check `docker compose logs backend` for the
+error - the most common ones are an app password copied with a typo, or
+2-Step Verification not actually being on yet (App Passwords silently
+aren't offered until it is).
 
 ## Project structure
 
