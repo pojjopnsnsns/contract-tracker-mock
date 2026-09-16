@@ -8,8 +8,8 @@ const TONE_COLOR = {
 
 function daysTone(days) {
   if (days < 0) return 'expired';
-  if (days <= 7) return 'critical';
-  if (days <= 30) return 'warn';
+  if (days <= 30) return 'critical';
+  if (days <= 60) return 'warn';
   if (days <= 90) return 'notice';
   return 'safe';
 }

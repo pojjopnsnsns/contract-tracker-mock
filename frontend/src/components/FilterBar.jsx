@@ -8,6 +8,7 @@ const STATUS_OPTIONS = [
 const ALERT_OPTIONS = [
   { value: 'overdue', label: 'เกินกำหนด' },
   { value: 'critical', label: 'วิกฤต (≤30 วัน)' },
+  { value: 'urgent', label: 'เร่งด่วน (≤60 วัน)' },
   { value: 'warning', label: 'เฝ้าระวัง (≤90 วัน)' },
   { value: 'ok', label: 'ปกติ' },
 ];

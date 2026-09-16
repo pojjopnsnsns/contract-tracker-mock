@@ -2,16 +2,18 @@ const BLOCKS = [
   { key: 'total', label: 'สัญญาทั้งหมด', tone: 'blue', icon: '📄' },
   { key: 'overdue', label: 'เกินกำหนด', tone: 'red', icon: '⏰' },
   { key: 'critical', label: 'วิกฤต (≤30 วัน)', tone: 'critical', icon: '🔥' },
+  { key: 'urgent', label: 'เร่งด่วน (≤60 วัน)', tone: 'urgent', icon: '🚨' },
   { key: 'warning', label: 'เฝ้าระวัง (≤90 วัน)', tone: 'warn', icon: '⚠️' },
   { key: 'ok', label: 'ปกติ', tone: 'green', icon: '✅' },
 ];
 
 export default function SummaryStrip({ contracts, onCardClick }) {
-  const counts = { total: contracts.length, overdue: 0, critical: 0, warning: 0, ok: 0 };
+  const counts = { total: contracts.length, overdue: 0, critical: 0, urgent: 0, warning: 0, ok: 0 };
   for (const c of contracts) {
     const level = c.alert_level;
     if (level === 'overdue') counts.overdue += 1;
     else if (level === 'critical') counts.critical += 1;
+    else if (level === 'urgent') counts.urgent += 1;
     else if (level === 'warning') counts.warning += 1;
     else if (level === 'ok') counts.ok += 1;
   }

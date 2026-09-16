@@ -6,17 +6,18 @@ import TopExpiringList from './TopExpiringList.jsx';
 import CountryRankList from './CountryRankList.jsx';
 
 const ALERT_COLORS = {
-  overdue: '#ff5b5b',
-  critical: '#ff7d33',
-  warning: '#ffa412',
-  ok: '#37c17e',
+  overdue: '#ff9999',  // แดงพาสเทล (เลยกำหนด)
+  critical: '#ffb380', // ส้มอมแดงพาสเทล (วิกฤต)
+  urgent: '#ffc966',   // ส้มเหลืองพาสเทล (เร่งด่วน)
+  warning: '#ffd666',  // เหลืองพาสเทล (เตือน)
+  ok: '#79dcab',       // เขียวพาสเทล (ปกติ/เรียบร้อย)
 };
 
 const STATUS_COLORS = {
-  'Upcoming renewal': '#ffa412',
-  'Negotiation in progress': '#4b7bec',
-  'Renewed': '#37c17e',
-  'Expired/Not renewed': '#ff5b5b',
+  'Upcoming renewal': '#ffd666',         // เหลืองพาสเทล (เทียบเท่า warning)
+  'Negotiation in progress': '#8fb4ff',  // ฟ้าพาสเทล (ดูนุ่มนวลขึ้นจากน้ำเงินเข้มเดิม)
+  'Renewed': '#79dcab',                  // เขียวพาสเทล (เทียบเท่า ok)
+  'Expired/Not renewed': '#ff9999',      // แดงพาสเทล (เทียบเท่า overdue)
 };
 
 function countBy(items, key) {
@@ -31,9 +32,9 @@ function countBy(items, key) {
 export default function DashboardPage({ contracts, onCardClick }) {
   const byStatus = countBy(contracts, 'status');
 
-  const alertOrder = ['overdue', 'critical', 'warning', 'ok'];
-  const alertLabels = { overdue: 'เกินกำหนด', critical: 'วิกฤต', warning: 'เฝ้าระวัง', ok: 'ปกติ' };
-  const alertCounts = { overdue: 0, critical: 0, warning: 0, ok: 0 };
+  const alertOrder = ['overdue', 'critical', 'urgent', 'warning', 'ok'];
+  const alertLabels = { overdue: 'เกินกำหนด', critical: 'วิกฤต', urgent: 'เร่งด่วน', warning: 'เฝ้าระวัง', ok: 'ปกติ' };
+  const alertCounts = { overdue: 0, critical: 0, urgent: 0, warning: 0, ok: 0 };
   for (const c of contracts) {
     if (alertCounts[c.alert_level] !== undefined) alertCounts[c.alert_level] += 1;
   }

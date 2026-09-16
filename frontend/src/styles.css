@@ -218,8 +218,6 @@ option {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 18px 20px;
-  min-width: 0;
-  overflow: hidden;
 }
 
 .chart-card--wide {
@@ -327,7 +325,7 @@ option {
 
 .summary-strip {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -371,6 +369,7 @@ option {
 .summary-icon--blue { background: var(--blue-bg); }
 .summary-icon--red { background: var(--red-bg); }
 .summary-icon--critical { background: var(--red-bg); }
+.summary-icon--urgent { background: var(--amber-bg); }
 .summary-icon--warn { background: var(--orange-bg); }
 .summary-icon--green { background: var(--green-bg); }
 
@@ -545,6 +544,8 @@ option {
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .contracts-table tbody tr:last-child td {
@@ -716,6 +717,9 @@ option {
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status--amber { background: var(--amber-bg); color: var(--amber); }

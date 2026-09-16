@@ -8,7 +8,7 @@ export default function Topbar({ activePage, onNavigate }) {
     <aside className="sidebar">
       <div className="sidebar__brand">
         <img className="sidebar__logo" src="/business-contract-tracker-icon.svg" alt="Contract Tracker" />
-        <span className="sidebar__brand-text">Contract Tracker</span>
+        <span className="sidebar__brand-text">Bussiness Contract Tracker</span>
       </div>
 
       <nav className="sidebar__nav">

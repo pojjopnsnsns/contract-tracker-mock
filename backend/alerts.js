@@ -3,12 +3,13 @@ const dayjs = require('dayjs');
 // Renewal-alert thresholds (days remaining until end_date)
 const THRESHOLDS = {
   CRITICAL: 30,  // <= 30 days, or already overdue
+  URGENT: 60,    // <= 60 days
   WARNING: 90,   // <= 90 days
 };
 
 // Days-remaining checkpoints at which an in-app notification gets generated
 // (once each, the first time a contract crosses below that many days left).
-const NOTIFICATION_THRESHOLDS = [90, 30, 7];
+const NOTIFICATION_THRESHOLDS = [90, 60, 30, 7];
 
 function daysUntil(endDate) {
   if (!endDate) return null;
@@ -23,6 +24,7 @@ function alertLevel(contract) {
 
   if (days < 0) return { level: 'overdue', days };
   if (days <= THRESHOLDS.CRITICAL) return { level: 'critical', days };
+  if (days <= THRESHOLDS.URGENT) return { level: 'urgent', days };
   if (days <= THRESHOLDS.WARNING) return { level: 'warning', days };
   return { level: 'ok', days };
 }

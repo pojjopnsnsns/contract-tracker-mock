@@ -101,7 +101,7 @@ app.delete('/api/contracts/:id', ah(async (req, res) => {
 
 app.get('/api/alerts', ah(async (req, res) => {
   const { rows } = await pool.query('SELECT * FROM contracts ORDER BY end_date ASC NULLS LAST');
-  const active = rows.map(withAlert).filter(r => ['overdue', 'critical', 'warning'].includes(r.alert_level));
+  const active = rows.map(withAlert).filter(r => ['overdue', 'critical', 'urgent', 'warning'].includes(r.alert_level));
   res.json(active);
 }));
 
@@ -111,7 +111,7 @@ app.get('/api/summary', ah(async (req, res) => {
   const summary = {
     total: withAlerts.length,
     by_status: {},
-    by_alert_level: { overdue: 0, critical: 0, warning: 0, ok: 0, unknown: 0 },
+    by_alert_level: { overdue: 0, critical: 0, urgent: 0, warning: 0, ok: 0, unknown: 0 },
   };
   for (const r of withAlerts) {
     summary.by_status[r.status] = (summary.by_status[r.status] || 0) + 1;
