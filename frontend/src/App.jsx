@@ -19,7 +19,7 @@ export default function App() {
   const [unseenCount, setUnseenCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [page, setPage] = useState('contracts');
+  const [page, setPage] = useState('dashboard');
 
   const [filters, setFilters] = useState({ search: '', status: '', serviceType: '', country: '' });
   const [modalContract, setModalContract] = useState(null); // null = closed, {} = new, {...} = edit
