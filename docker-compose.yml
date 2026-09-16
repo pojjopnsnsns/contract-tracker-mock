@@ -1,4 +1,15 @@
 services:
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --url http://frontend:80
+
+  cloudflared-api:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --url http://backend:4000
+
   postgres:
     image: postgres:16-alpine
     container_name: contract-tracker-postgres
@@ -33,8 +44,8 @@ services:
       # Optional LINE Notify push - leave unset to disable
       - LINE_CHANNEL_ACCESS_TOKEN=
       - LINE_TARGET_ID=
-      # Email alert via Gmail SMTP - fill in SMTP_USER/SMTP_PASS/ALERT_EMAIL_TO to enable
-      - SMTP_HOST=smtp.gmail.com
+      # Optional email alert via SMTP - leave SMTP_HOST/ALERT_EMAIL_TO unset to disable
+      - SMTP_HOST=
       - SMTP_PORT=587
       - SMTP_SECURE=false
       - SMTP_USER=
@@ -50,13 +61,12 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE: http://localhost:4000
+        VITE_API_BASE: https://atlantic-buttons-logistics-released.trycloudflare.com # original: http:localhost:4000
     container_name: contract-tracker-frontend
     ports:
       - "5173:80"
     depends_on:
       - backend
     restart: unless-stopped
-
 volumes:
   contract-tracker-pgdata:
