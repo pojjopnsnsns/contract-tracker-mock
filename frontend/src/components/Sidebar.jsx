@@ -1,13 +1,9 @@
 const NAV_ITEMS = [
-  { id: 'summary', icon: '◧', label: 'ภาพรวม' },
   { id: 'contracts', icon: '☰', label: 'รายการสัญญา' },
+  { id: 'dashboard', icon: '◧', label: 'สรุปภาพรวม (กราฟ)' },
 ];
 
-function scrollTo(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-export default function Sidebar({ activeId }) {
+export default function Sidebar({ activePage, onNavigate }) {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
@@ -19,8 +15,8 @@ export default function Sidebar({ activeId }) {
         {NAV_ITEMS.map((item) => (
           <button
             key={item.id}
-            className={`sidebar__nav-item ${activeId === item.id ? 'sidebar__nav-item--active' : ''}`}
-            onClick={() => scrollTo(item.id)}
+            className={`sidebar__nav-item ${activePage === item.id ? 'sidebar__nav-item--active' : ''}`}
+            onClick={() => onNavigate(item.id)}
           >
             <span className="sidebar__nav-icon">{item.icon}</span>
             <span>{item.label}</span>

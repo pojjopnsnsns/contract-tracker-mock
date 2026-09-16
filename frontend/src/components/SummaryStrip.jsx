@@ -17,7 +17,7 @@ export default function SummaryStrip({ contracts }) {
   }
 
   return (
-    <div className="summary-strip" id="summary">
+    <div className="summary-strip">
       {BLOCKS.map((b) => {
         const pct = counts.total > 0 && b.key !== 'total'
           ? Math.round((counts[b.key] / counts.total) * 100)

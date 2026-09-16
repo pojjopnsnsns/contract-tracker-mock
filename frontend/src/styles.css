@@ -76,6 +76,9 @@ button {
   flex-direction: row;
   align-items: center;
   gap: 32px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
 .sidebar__brand {
@@ -186,6 +189,47 @@ button {
 
 .loading-text {
   color: var(--ink-muted);
+}
+
+/* ---------- Dashboard / charts ---------- */
+
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+
+.chart-card--wide {
+  grid-column: span 2;
+}
+
+.chart-card__title {
+  margin: 0 0 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card--wide {
+    grid-column: span 1;
+  }
 }
 
 /* ---------- Summary strip (KPI cards) ---------- */
@@ -478,6 +522,84 @@ button {
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   background: var(--card);
+}
+
+/* ---------- Table footer / pagination ---------- */
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.table-footer__count {
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination__btn {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination__btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination__btn:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pagination__page {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: none;
+  background: none;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination__page:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.pagination__page--active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.pagination__ellipsis {
+  padding: 0 4px;
+  color: var(--ink-muted);
+  font-size: 12.5px;
 }
 
 /* ---------- Status chip ---------- */

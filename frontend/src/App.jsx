@@ -1,11 +1,17 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, Suspense, lazy } from 'react';
 import { api } from './api.js';
 import Sidebar from './components/Sidebar.jsx';
-import SummaryStrip from './components/SummaryStrip.jsx';
 import FilterBar from './components/FilterBar.jsx';
 import ContractsTable from './components/ContractsTable.jsx';
 import ContractFormModal from './components/ContractFormModal.jsx';
 import NotificationBell from './components/NotificationBell.jsx';
+
+const DashboardPage = lazy(() => import('./components/DashboardPage.jsx'));
+
+const PAGE_TITLES = {
+  contracts: { eyebrow: 'ทะเบียนสัญญา', title: 'ระบบติดตามการต่อสัญญา' },
+  dashboard: { eyebrow: 'ภาพรวม', title: 'สรุปภาพรวมสัญญา' },
+};
 
 export default function App() {
   const [contracts, setContracts] = useState([]);
@@ -13,6 +19,7 @@ export default function App() {
   const [unseenCount, setUnseenCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState('contracts');
 
   const [filters, setFilters] = useState({ search: '', status: '', serviceType: '', country: '' });
   const [modalContract, setModalContract] = useState(null); // null = closed, {} = new, {...} = edit
@@ -97,15 +104,17 @@ export default function App() {
     });
   }, [contracts, filters]);
 
+  const { eyebrow, title } = PAGE_TITLES[page];
+
   return (
     <div className="app-shell">
-      <Sidebar activeId="summary" />
+      <Sidebar activePage={page} onNavigate={setPage} />
 
       <div className="app">
         <header className="app-header">
           <div className="app-header__title">
-            <span className="app-header__eyebrow">ทะเบียนสัญญา</span>
-            <h1>ระบบติดตามการต่อสัญญา</h1>
+            <span className="app-header__eyebrow">{eyebrow}</span>
+            <h1>{title}</h1>
           </div>
           <NotificationBell
             notifications={notifications}
@@ -122,25 +131,27 @@ export default function App() {
           {loading && <p className="loading-text">กำลังโหลดข้อมูล...</p>}
           {error && <p className="form-error">{error}</p>}
 
-          {!loading && !error && (
+          {!loading && !error && page === 'dashboard' && (
+            <Suspense fallback={<p className="loading-text">กำลังโหลดกราฟ...</p>}>
+              <DashboardPage contracts={contracts} />
+            </Suspense>
+          )}
+
+          {!loading && !error && page === 'contracts' && (
             <>
-              <SummaryStrip contracts={contracts} />
+              <FilterBar
+                filters={filters}
+                onChange={setFilters}
+                serviceTypes={serviceTypes}
+                countries={countries}
+                onAddClick={() => setModalContract({})}
+              />
 
-              <div id="contracts">
-                <FilterBar
-                  filters={filters}
-                  onChange={setFilters}
-                  serviceTypes={serviceTypes}
-                  countries={countries}
-                  onAddClick={() => setModalContract({})}
-                />
-
-                <ContractsTable
-                  contracts={filtered}
-                  onEdit={(c) => setModalContract(c)}
-                  onDelete={handleDelete}
-                />
-              </div>
+              <ContractsTable
+                contracts={filtered}
+                onEdit={(c) => setModalContract(c)}
+                onDelete={handleDelete}
+              />
             </>
           )}
         </main>

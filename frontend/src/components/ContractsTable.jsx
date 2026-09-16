@@ -1,4 +1,5 @@
 import { useState, useMemo, Fragment } from 'react';
+import Pagination from './Pagination.jsx';
 
 const STATUS_TONE = {
   'Upcoming renewal': 'amber',
@@ -55,9 +56,12 @@ function compareValues(a, b, key) {
   return String(av).localeCompare(String(bv), 'th');
 }
 
+const PAGE_SIZE = 10;
+
 export default function ContractsTable({ contracts, onEdit, onDelete }) {
   const [expandedId, setExpandedId] = useState(null);
   const [sort, setSort] = useState({ key: 'end_date', direction: 'asc' });
+  const [page, setPage] = useState(1);
 
   const sorted = useMemo(() => {
     const arr = [...contracts];
@@ -68,6 +72,12 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
     return arr;
   }, [contracts, sort]);
 
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  // Clamp instead of using state directly, so a filter/sort change that shrinks
+  // the result set below the current page number doesn't leave the table blank.
+  const currentPage = Math.min(page, pageCount);
+  const pageItems = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
   if (contracts.length === 0) {
     return <div className="empty-state">ไม่พบสัญญาตามเงื่อนไขที่เลือก</div>;
   }
@@ -77,6 +87,7 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
   }
 
   function handleSort(key) {
+    setPage(1);
     setSort((prev) =>
       prev.key === key
         ? { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
@@ -85,6 +96,7 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
   }
 
   return (
+    <>
     <div className="table-wrap">
       <table className="contracts-table">
         <colgroup>
@@ -111,7 +123,7 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((c) => {
+          {pageItems.map((c) => {
             const isExpanded = expandedId === c.id;
             return (
               <Fragment key={c.id}>
@@ -179,5 +191,13 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
         </tbody>
       </table>
     </div>
+
+    <div className="table-footer">
+      <span className="table-footer__count">
+        แสดง {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, sorted.length)} จาก {sorted.length} รายการ
+      </span>
+      <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} />
+    </div>
+    </>
   );
 }
