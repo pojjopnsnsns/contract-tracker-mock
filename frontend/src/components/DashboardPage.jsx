@@ -5,8 +5,8 @@ import SummaryStrip from './SummaryStrip.jsx';
 
 const ALERT_COLORS = {
   overdue: '#ff5b5b',
-  critical: '#ff5b5b',
-  warning: '#ff7d33',
+  critical: '#ff7d33',
+  warning: '#ffa412',
   ok: '#37c17e',
 };
 

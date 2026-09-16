@@ -154,7 +154,6 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
@@ -184,7 +183,6 @@ button {
 .app-main {
   flex: 1;
   padding: 20px 32px 48px;
-  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;

@@ -1,6 +1,6 @@
 const NAV_ITEMS = [
+  { id: 'dashboard', icon: '◧', label: 'สรุปภาพรวม' },
   { id: 'contracts', icon: '☰', label: 'รายการสัญญา' },
-  { id: 'dashboard', icon: '◧', label: 'สรุปภาพรวม (กราฟ)' },
 ];
 
 export default function Sidebar({ activePage, onNavigate }) {
