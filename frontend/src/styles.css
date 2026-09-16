@@ -156,6 +156,10 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .app-header__title {
@@ -182,9 +186,10 @@ button {
 .app-main {
   flex: 1;
   padding: 20px 32px 48px;
-  max-width: 1400px;
+  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .loading-text {
@@ -466,14 +471,13 @@ button {
   font-weight: 600;
 }
 
-/* Truncate long values to their column width instead of stretching the row;
-   full text is still available via the title attribute (tooltip) and in the
-   expanded detail row. */
+/* Wrap long values within their column width instead of stretching the row
+   or truncating with "...". table-layout: fixed on .contracts-table already
+   caps the column width via <colgroup>, so normal white-space just wraps. */
 .cell-clip {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 0; /* forces the browser to respect the <col> width, not content width */
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .expand-toggle {
