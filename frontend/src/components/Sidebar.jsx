@@ -12,7 +12,7 @@ export default function Sidebar({ activeId }) {
     <aside className="sidebar">
       <div className="sidebar__brand">
         <span className="sidebar__logo">CT</span>
-        <span className="sidebar__brand-text">Contract<br />Tracker</span>
+        <span className="sidebar__brand-text">Contract Tracker</span>
       </div>
 
       <nav className="sidebar__nav">
