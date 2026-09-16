@@ -6,6 +6,7 @@ const cron = require('node-cron');
 const { pool, initSchema, seedFromCsv } = require('./db');
 const { withAlert, NOTIFICATION_THRESHOLDS } = require('./alerts');
 const { sendLineMessage } = require('./notifyLine');
+const { sendAlertEmail } = require('./notifyEmail');
 
 const app = express();
 app.use(cors());
@@ -195,29 +196,66 @@ app.post('/api/notifications/mark-all-seen', ah(async (req, res) => {
 async function runDailyAlertCheck() {
   const { rows } = await pool.query('SELECT * FROM contracts');
   const due = rows.map(withAlert).filter(r => ['overdue', 'critical'].includes(r.alert_level));
-  if (due.length === 0) return;
+  if (due.length === 0) return { skipped: true, reason: 'no active alerts' };
 
   const lines = due.map(r =>
     `• ${r.contract_name} (${r.partner || '-'}) — ${r.alert_level === 'overdue' ? 'overdue' : `${r.days_until_end}d left`}`
   );
   const message = `Contract renewal alert (${due.length}):\n${lines.join('\n')}`;
 
-  const result = await sendLineMessage(message);
+  const htmlRows = due.map(r => `
+    <tr>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;">${r.contract_name}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;">${r.partner || '-'}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;">${r.end_date || '-'}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;color:${r.alert_level === 'overdue' ? '#b3261e' : '#c1571b'};">
+        ${r.alert_level === 'overdue' ? 'เกินกำหนด' : `เหลือ ${r.days_until_end} วัน`}
+      </td>
+    </tr>`).join('');
+  const html = `
+    <div style="font-family:sans-serif;font-size:14px;color:#1b1f27;">
+      <p>สัญญาที่ต้องติดตามการต่อสัญญา (${due.length} รายการ):</p>
+      <table style="border-collapse:collapse;width:100%;">
+        <thead>
+          <tr style="text-align:left;background:#fafaf8;">
+            <th style="padding:6px 10px;">ชื่อสัญญา</th>
+            <th style="padding:6px 10px;">คู่สัญญา</th>
+            <th style="padding:6px 10px;">วันครบกำหนด</th>
+            <th style="padding:6px 10px;">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody>${htmlRows}</tbody>
+      </table>
+    </div>`;
+
+  const [lineResult, emailResult] = await Promise.all([
+    sendLineMessage(message),
+    sendAlertEmail(`แจ้งเตือนการต่อสัญญา (${due.length} รายการ)`, message, html),
+  ]);
+
   for (const r of due) {
-    await pool.query(
-      'INSERT INTO notification_log (contract_id, channel, message) VALUES ($1, $2, $3)',
-      [r.id, 'line', message]
-    );
+    if (!lineResult.skipped) {
+      await pool.query(
+        'INSERT INTO notification_log (contract_id, channel, message) VALUES ($1, $2, $3)',
+        [r.id, 'line', message]
+      );
+    }
+    if (!emailResult.skipped) {
+      await pool.query(
+        'INSERT INTO notification_log (contract_id, channel, message) VALUES ($1, $2, $3)',
+        [r.id, 'email', message]
+      );
+    }
   }
-  return result;
+  return { line: lineResult, email: emailResult };
 }
 
 app.post('/api/notify/run-now', ah(async (req, res) => {
   const result = await runDailyAlertCheck();
-  res.json({ ok: true, result: result || { skipped: true, reason: 'no active alerts' } });
+  res.json({ ok: true, result });
 }));
 
-// Daily at 08:00 server time - sends nothing unless LINE env vars are configured
+// Daily at 08:00 server time - sends nothing on channels that aren't configured
 cron.schedule('0 8 * * *', () => {
   runDailyAlertCheck().catch(err => console.error('Daily alert check failed:', err));
 });

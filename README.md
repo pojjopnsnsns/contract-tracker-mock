@@ -93,6 +93,30 @@ via the LINE Messaging API. It's a no-op until configured:
 3. It runs automatically at 08:00 server time, or trigger it manually:
    `POST http://localhost:4000/api/notify/run-now`.
 
+## Email renewal notifications (optional)
+
+Same daily digest, sent as an HTML email via any standard SMTP server -
+a company mail relay, Gmail with an app password, or a transactional
+provider's SMTP endpoint (SendGrid/SES/etc). No-op until configured:
+
+1. In `docker-compose.yml`'s backend `environment:` block (or as OS env
+   vars if running without Docker), set:
+   - `SMTP_HOST` - your mail server's hostname
+   - `SMTP_PORT` - usually `587` (STARTTLS) or `465` (implicit TLS)
+   - `SMTP_SECURE` - `true` only if using port 465, otherwise `false`
+   - `SMTP_USER` / `SMTP_PASS` - leave blank if your relay allows
+     unauthenticated mail from trusted IPs (common for internal
+     on-prem relays)
+   - `SMTP_FROM` - the From address (defaults to `SMTP_USER` if unset)
+   - `ALERT_EMAIL_TO` - one or more recipient addresses, comma-separated
+2. It runs on the same 08:00 schedule and the same manual trigger as LINE
+   above - both fire together from one `POST /api/notify/run-now` call,
+   and each only actually sends if its own env vars are set.
+
+If AEROTHAI has an internal SMTP relay (common for on-prem mail systems),
+that's usually the simplest option - no external account or app password
+needed, just the relay's hostname and port from your mail admin.
+
 ## Project structure
 
 ```
