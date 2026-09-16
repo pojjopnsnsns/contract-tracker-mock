@@ -7,7 +7,7 @@ export default function Sidebar({ activePage, onNavigate }) {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <span className="sidebar__logo">CT</span>
+        <img className="sidebar__logo" src="/business-contract-tracker-icon.svg" alt="Contract Tracker" />
         <span className="sidebar__brand-text">Contract Tracker</span>
       </div>
 

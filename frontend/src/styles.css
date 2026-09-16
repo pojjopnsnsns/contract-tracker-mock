@@ -89,17 +89,15 @@ button {
 }
 
 .sidebar__logo {
-  width: 36px;
-  height: 36px;
+  width: 49px;
+  height: 49px;
   border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
   flex-shrink: 0;
+  object-fit: contain;
+  padding: 4px;
 }
 
 .sidebar__brand-text {
