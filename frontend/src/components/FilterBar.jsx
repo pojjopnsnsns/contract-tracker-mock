@@ -5,6 +5,13 @@ const STATUS_OPTIONS = [
   'Expired/Not renewed',
 ];
 
+const ALERT_OPTIONS = [
+  { value: 'overdue', label: 'เกินกำหนด' },
+  { value: 'critical', label: 'วิกฤต (≤30 วัน)' },
+  { value: 'warning', label: 'เฝ้าระวัง (≤90 วัน)' },
+  { value: 'ok', label: 'ปกติ' },
+];
+
 export default function FilterBar({ filters, onChange, serviceTypes, countries, onAddClick }) {
   function set(field, value) {
     onChange({ ...filters, [field]: value });
@@ -24,6 +31,13 @@ export default function FilterBar({ filters, onChange, serviceTypes, countries, 
         <option value="">สถานะทั้งหมด</option>
         {STATUS_OPTIONS.map((s) => (
           <option key={s} value={s}>{s}</option>
+        ))}
+      </select>
+
+      <select value={filters.alertLevel} onChange={(e) => set('alertLevel', e.target.value)}>
+        <option value="">ระดับแจ้งเตือนทั้งหมด</option>
+        {ALERT_OPTIONS.map((a) => (
+          <option key={a.value} value={a.value}>{a.label}</option>
         ))}
       </select>
 

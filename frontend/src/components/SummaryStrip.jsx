@@ -6,7 +6,7 @@ const BLOCKS = [
   { key: 'ok', label: 'ปกติ', tone: 'green', icon: '✅' },
 ];
 
-export default function SummaryStrip({ contracts }) {
+export default function SummaryStrip({ contracts, onCardClick }) {
   const counts = { total: contracts.length, overdue: 0, critical: 0, warning: 0, ok: 0 };
   for (const c of contracts) {
     const level = c.alert_level;
@@ -23,7 +23,13 @@ export default function SummaryStrip({ contracts }) {
           ? Math.round((counts[b.key] / counts.total) * 100)
           : null;
         return (
-          <div key={b.key} className={`summary-block summary-block--${b.tone}`}>
+          <div
+            key={b.key}
+            className={`summary-block summary-block--${b.tone} ${onCardClick ? 'summary-block--clickable' : ''}`}
+            onClick={onCardClick ? () => onCardClick(b.key) : undefined}
+            role={onCardClick ? 'button' : undefined}
+            tabIndex={onCardClick ? 0 : undefined}
+          >
             <span className={`summary-icon summary-icon--${b.tone}`}>{b.icon}</span>
             <div className="summary-block__text">
               <span className="summary-value">{counts[b.key]}</span>

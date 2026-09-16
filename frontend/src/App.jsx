@@ -21,7 +21,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [page, setPage] = useState('dashboard');
 
-  const [filters, setFilters] = useState({ search: '', status: '', serviceType: '', country: '' });
+  const [filters, setFilters] = useState({ search: '', status: '', alertLevel: '', serviceType: '', country: '' });
   const [modalContract, setModalContract] = useState(null); // null = closed, {} = new, {...} = edit
   const [toast, setToast] = useState('');
 
@@ -81,6 +81,11 @@ export default function App() {
     await loadNotifications();
   }
 
+  function handleSummaryCardClick(key) {
+    setFilters((f) => ({ ...f, alertLevel: key === 'total' ? '' : key }));
+    setPage('contracts');
+  }
+
   const serviceTypes = useMemo(
     () => [...new Set(contracts.map((c) => c.service_type).filter(Boolean))].sort(),
     [contracts]
@@ -94,6 +99,7 @@ export default function App() {
     const q = filters.search.trim().toLowerCase();
     return contracts.filter((c) => {
       if (filters.status && c.status !== filters.status) return false;
+      if (filters.alertLevel && c.alert_level !== filters.alertLevel) return false;
       if (filters.serviceType && c.service_type !== filters.serviceType) return false;
       if (filters.country && c.country !== filters.country) return false;
       if (q) {
@@ -133,7 +139,7 @@ export default function App() {
 
           {!loading && !error && page === 'dashboard' && (
             <Suspense fallback={<p className="loading-text">กำลังโหลดกราฟ...</p>}>
-              <DashboardPage contracts={contracts} />
+              <DashboardPage contracts={contracts} onCardClick={handleSummaryCardClick} />
             </Suspense>
           )}
 

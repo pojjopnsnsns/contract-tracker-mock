@@ -26,7 +26,7 @@ function countBy(items, key) {
   return Object.entries(counts).map(([name, count]) => ({ name, count }));
 }
 
-export default function DashboardPage({ contracts }) {
+export default function DashboardPage({ contracts, onCardClick }) {
   const byStatus = countBy(contracts, 'status');
 
   const alertOrder = ['overdue', 'critical', 'warning', 'ok'];
@@ -43,7 +43,7 @@ export default function DashboardPage({ contracts }) {
 
   return (
     <div className="dashboard-page">
-      <SummaryStrip contracts={contracts} />
+      <SummaryStrip contracts={contracts} onCardClick={onCardClick} />
 
       <div className="chart-grid">
         <div className="chart-card">
