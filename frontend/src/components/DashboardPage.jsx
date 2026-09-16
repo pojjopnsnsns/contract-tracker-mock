@@ -39,7 +39,7 @@ export default function DashboardPage({ contracts, onCardClick }) {
 
   const byCountry = countBy(contracts, 'country')
     .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+    .slice(0, 10);
 
   return (
     <div className="dashboard-page">
@@ -81,7 +81,7 @@ export default function DashboardPage({ contracts, onCardClick }) {
         </div>
 
         <div className="chart-card chart-card--wide">
-          <h3 className="chart-card__title">จำนวนสัญญาตามประเทศ (สูงสุด 8 อันดับ)</h3>
+          <h3 className="chart-card__title">จำนวนสัญญาตามประเทศ (สูงสุด 10 อันดับ)</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={byCountry} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eceefa" />
