@@ -35,9 +35,19 @@ async function initSchema() {
       status TEXT,
       cost_amount NUMERIC,
       cost_currency TEXT DEFAULT 'THB',
+      contract_type TEXT DEFAULT 'Master',
+      parent_contract_id INTEGER REFERENCES contracts(id) ON DELETE SET NULL,
+      original_end_date DATE,
       created_at TIMESTAMPTZ DEFAULT now(),
       updated_at TIMESTAMPTZ DEFAULT now()
     );
+
+    ALTER TABLE contracts ADD COLUMN IF NOT EXISTS contract_type TEXT DEFAULT 'Master';
+    ALTER TABLE contracts ADD COLUMN IF NOT EXISTS parent_contract_id INTEGER REFERENCES contracts(id) ON DELETE SET NULL;
+    ALTER TABLE contracts ADD COLUMN IF NOT EXISTS original_end_date DATE;
+    -- Backfill for rows that existed before this column: best guess is their
+    -- current end_date, since we have no earlier record for them.
+    UPDATE contracts SET original_end_date = end_date WHERE original_end_date IS NULL;
 
     CREATE TABLE IF NOT EXISTS notification_log (
       id SERIAL PRIMARY KEY,

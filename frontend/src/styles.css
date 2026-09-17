@@ -110,7 +110,7 @@ option {
 
 .sidebar__brand-text {
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.3;
   color: var(--ink);
   white-space: nowrap;
@@ -186,6 +186,27 @@ option {
   font-weight: 700;
 }
 
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 0 4px;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
 /* ---------- Main layout ---------- */
 
 .app-main {
@@ -205,6 +226,7 @@ option {
 .dashboard-page {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
 .chart-grid {
@@ -321,13 +343,86 @@ option {
   }
 }
 
+/* ---------- Contract hierarchy (Master / Sub-contract) ---------- */
+
+.hierarchy-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.hierarchy-group {
+  border-bottom: 1px solid var(--border);
+}
+
+.hierarchy-group:last-child {
+  border-bottom: none;
+}
+
+.hierarchy-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 2fr) minmax(0, 1fr) 110px 140px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 4px;
+}
+
+.hierarchy-row--master {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.hierarchy-row--master:hover {
+  background: var(--bg);
+}
+
+.hierarchy-row--child {
+  padding-left: 4px;
+  background: #fbfbff;
+}
+
+.hierarchy-toggle {
+  color: var(--ink-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.hierarchy-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hierarchy-row--child .hierarchy-name {
+  padding-left: 20px;
+  font-weight: 400;
+}
+
+.hierarchy-meta {
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+
+.hierarchy-date {
+  font-size: 12.5px;
+}
+
+@media (max-width: 720px) {
+  .hierarchy-row {
+    grid-template-columns: 20px minmax(0, 1fr) 85px 90px;
+  }
+
+  .hierarchy-meta {
+    display: none;
+  }
+}
+
 /* ---------- Summary strip (KPI cards) ---------- */
 
 .summary-strip {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
 }
 
 .summary-block {
@@ -466,6 +561,17 @@ option {
   color: #fff;
 }
 
+.btn--danger {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.btn--danger:hover {
+  background: #e64545;
+  color: #fff;
+}
+
 .link-btn {
   background: none;
   border: none;
@@ -544,8 +650,6 @@ option {
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .contracts-table tbody tr:last-child td {
@@ -598,6 +702,28 @@ option {
   background: #fafaff;
 }
 
+.row-highlighted {
+  animation: highlight-fade 3s ease-out;
+}
+
+@keyframes highlight-fade {
+  0% { background: var(--primary-bg); }
+  100% { background: transparent; }
+}
+
+.type-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--primary-bg);
+  color: var(--primary);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
 .detail-row td {
   background: #fbfbff;
   padding: 16px 16px 20px 44px;
@@ -619,6 +745,42 @@ option {
   font-size: 11px;
   color: var(--ink-muted);
   margin-bottom: 2px;
+}
+
+.detail-subcontracts {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.subcontract-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.subcontract-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 100px auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.subcontract-item:hover {
+  border-color: var(--primary);
+}
+
+.subcontract-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .empty-state {
@@ -717,9 +879,6 @@ option {
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .status--amber { background: var(--amber-bg); color: var(--amber); }
@@ -762,6 +921,10 @@ option {
   width: 100%;
   max-width: 720px;
   box-shadow: var(--shadow-lg);
+}
+
+.modal--narrow {
+  max-width: 420px;
 }
 
 .modal-header {

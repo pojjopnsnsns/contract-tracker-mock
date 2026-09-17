@@ -1,5 +1,7 @@
-import { useState, useMemo, Fragment } from 'react';
+import { useState, useMemo, useEffect, Fragment } from 'react';
 import Pagination from './Pagination.jsx';
+import StatusUpdateModal from './StatusUpdateModal.jsx';
+import ConfirmDialog from './ConfirmDialog.jsx';
 
 const STATUS_TONE = {
   'Upcoming renewal': 'amber',
@@ -8,15 +10,21 @@ const STATUS_TONE = {
   'Expired/Not renewed': 'red',
 };
 
+const TYPE_LABEL = {
+  Master: 'Master',
+  Amendment: 'Amendment',
+  Addendum: 'Addendum',
+};
+
 const COLUMNS = [
-  { key: 'contract_name', label: 'ชื่อสัญญา', width: '20%' },
-  { key: 'partner', label: 'คู่สัญญา', width: '13%' },
-  { key: 'country', label: 'ประเทศ', width: '9%' },
-  { key: 'end_date', label: 'วันที่ครบกำหนด', width: '11%' },
-  { key: 'days_until_end', label: 'คงเหลือ', width: '9%', num: true },
-  { key: 'status', label: 'สถานะ', width: '13%' },
-  { key: 'responsible_by', label: 'ผู้รับผิดชอบ', width: '11%' },
-  { key: 'cost_amount', label: 'มูลค่าสัญญา', width: '10%', num: true },
+  { key: 'contract_name', label: 'ชื่อสัญญา', width: '19%' },
+  { key: 'partner', label: 'คู่สัญญา', width: '12%' },
+  { key: 'country', label: 'ประเทศ', width: '8%' },
+  { key: 'end_date', label: 'วันที่ครบกำหนด', width: '10%' },
+  { key: 'days_until_end', label: 'คงเหลือ', width: '8%', num: true },
+  { key: 'status', label: 'สถานะ', width: '12%' },
+  { key: 'responsible_by', label: 'ผู้รับผิดชอบ', width: '10%' },
+  { key: 'cost_amount', label: 'มูลค่าสัญญา', width: '9%', num: true },
 ];
 
 function statusTone(status) {
@@ -26,8 +34,8 @@ function statusTone(status) {
 function daysTone(days) {
   if (days == null) return 'safe';
   if (days < 0) return 'expired';
-  if (days <= 30) return 'critical';
-  if (days <= 60) return 'warn';
+  if (days <= 7) return 'critical';
+  if (days <= 30) return 'warn';
   if (days <= 90) return 'notice';
   return 'safe';
 }
@@ -58,10 +66,15 @@ function compareValues(a, b, key) {
 
 const PAGE_SIZE = 10;
 
-export default function ContractsTable({ contracts, onEdit, onDelete }) {
+export default function ContractsTable({
+  contracts, allContracts, onEdit, onDelete, onUpdateStatus, highlightId, onHighlightConsumed,
+}) {
   const [expandedId, setExpandedId] = useState(null);
   const [sort, setSort] = useState({ key: 'end_date', direction: 'asc' });
   const [page, setPage] = useState(1);
+  const [statusModalContract, setStatusModalContract] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [visualHighlight, setVisualHighlight] = useState(null);
 
   const sorted = useMemo(() => {
     const arr = [...contracts];
@@ -77,6 +90,39 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
   // the result set below the current page number doesn't leave the table blank.
   const currentPage = Math.min(page, pageCount);
   const pageItems = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // Deep-link from a notification: jump to the page containing the target
+  // contract, expand its row, and scroll it into view.
+  useEffect(() => {
+    if (highlightId == null) return;
+    const idx = sorted.findIndex((c) => c.id === highlightId);
+    if (idx === -1) return;
+
+    const targetPage = Math.floor(idx / PAGE_SIZE) + 1;
+    setPage(targetPage);
+    setExpandedId(highlightId);
+    setVisualHighlight(highlightId);
+
+    const scrollTimer = setTimeout(() => {
+      document.getElementById(`contract-row-${highlightId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+
+    onHighlightConsumed?.();
+
+    const fadeTimer = setTimeout(() => setVisualHighlight(null), 3000);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(fadeTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightId, sorted]);
+
+  function parentName(contract) {
+    if (!contract.parent_contract_id) return null;
+    const parent = (allContracts || []).find((c) => c.id === contract.parent_contract_id);
+    return parent ? parent.contract_name : `#${contract.parent_contract_id}`;
+  }
 
   if (contracts.length === 0) {
     return <div className="empty-state">ไม่พบสัญญาตามเงื่อนไขที่เลือก</div>;
@@ -95,6 +141,10 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
     );
   }
 
+  function handleDeleteClick(c) {
+    setConfirmDelete(c);
+  }
+
   return (
     <>
     <div className="table-wrap">
@@ -102,7 +152,7 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
         <colgroup>
           <col style={{ width: '32px' }} />
           {COLUMNS.map((col) => <col key={col.key} style={{ width: col.width }} />)}
-          <col style={{ width: '96px' }} />
+          <col style={{ width: '130px' }} />
         </colgroup>
         <thead>
           <tr>
@@ -125,14 +175,27 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
         <tbody>
           {pageItems.map((c) => {
             const isExpanded = expandedId === c.id;
+            const isHighlighted = visualHighlight === c.id;
+            const type = c.contract_type || 'Master';
+            const children = type === 'Master'
+              ? (allContracts || []).filter((x) => x.parent_contract_id === c.id)
+              : [];
             return (
               <Fragment key={c.id}>
                 <tr
-                  className={isExpanded ? 'row-expanded' : ''}
+                  id={`contract-row-${c.id}`}
+                  className={`${isExpanded ? 'row-expanded' : ''} ${isHighlighted ? 'row-highlighted' : ''}`}
                   onClick={() => toggleExpand(c.id)}
                 >
                   <td className="expand-toggle">{isExpanded ? '▾' : '▸'}</td>
-                  <td className="cell-strong cell-clip" title={c.contract_name}>{c.contract_name}</td>
+                  <td className="cell-strong cell-clip" title={c.contract_name}>
+                    {c.contract_name}
+                    {type !== 'Master' && (
+                      <span className="type-badge" title={`Amendment/Addendum ของ: ${parentName(c) || '-'}`}>
+                        {TYPE_LABEL[type]}
+                      </span>
+                    )}
+                  </td>
                   <td className="cell-clip" title={c.partner || ''}>{c.partner || '-'}</td>
                   <td className="cell-clip" title={c.country || ''}>{c.country || '-'}</td>
                   <td className="mono">{c.end_date || '-'}</td>
@@ -149,14 +212,25 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
                   <td className="cell-clip" title={c.responsible_by || ''}>{c.responsible_by || '-'}</td>
                   <td className="num">{formatMoney(c.cost_amount, c.cost_currency)}</td>
                   <td className="row-actions" onClick={(e) => e.stopPropagation()}>
+                    <button className="link-btn" onClick={() => setStatusModalContract(c)}>สถานะ</button>
                     <button className="link-btn" onClick={() => onEdit(c)}>แก้ไข</button>
-                    <button className="link-btn link-btn--danger" onClick={() => onDelete(c.id)}>ลบ</button>
+                    <button className="link-btn link-btn--danger" onClick={() => handleDeleteClick(c)}>ลบ</button>
                   </td>
                 </tr>
                 {isExpanded && (
                   <tr className="detail-row">
                     <td colSpan={10}>
                       <div className="detail-grid">
+                        <div>
+                          <span className="detail-label">ประเภทสัญญา</span>
+                          {TYPE_LABEL[type]}
+                        </div>
+                        {type !== 'Master' && (
+                          <div>
+                            <span className="detail-label">สัญญาหลัก (Master)</span>
+                            {parentName(c) || '-'}
+                          </div>
+                        )}
                         <div>
                           <span className="detail-label">ประเภทบริการ</span>
                           {c.service_type || '-'}
@@ -173,6 +247,14 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
                           <span className="detail-label">วันที่เริ่มสัญญา</span>
                           {c.start_date || '-'}
                         </div>
+                        <div>
+                          <span className="detail-label">วันสิ้นสุดสัญญา</span>
+                          <span className="mono">{c.original_end_date || '-'}</span>
+                        </div>
+                        <div>
+                          <span className="detail-label">วันสิ้นสุดสัญญา (ขยาย)</span>
+                          <span className="mono">{c.end_date || '-'}</span>
+                        </div>
                         <div className="detail-wide">
                           <span className="detail-label">หมายเหตุ</span>
                           {c.note || '-'}
@@ -182,6 +264,28 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
                           {c.remark || '-'}
                         </div>
                       </div>
+
+                      {type === 'Master' && children.length > 0 && (
+                        <div className="detail-subcontracts">
+                          <span className="detail-label">Sub-contract (Amendment/Addendum)</span>
+                          <div className="subcontract-list">
+                            {children.map((k) => (
+                              <div
+                                key={k.id}
+                                className="subcontract-item"
+                                onClick={() => onEdit(k)}
+                              >
+                                <span className="type-badge">{TYPE_LABEL[k.contract_type] || k.contract_type}</span>
+                                <span className="subcontract-name" title={k.contract_name}>{k.contract_name}</span>
+                                <span className="mono">{k.end_date || '-'}</span>
+                                <span className={`status-chip status--${statusTone(k.status)}`}>
+                                  {k.status || '-'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )}
@@ -198,6 +302,30 @@ export default function ContractsTable({ contracts, onEdit, onDelete }) {
       </span>
       <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} />
     </div>
+
+    {statusModalContract && (
+      <StatusUpdateModal
+        contract={statusModalContract}
+        onClose={() => setStatusModalContract(null)}
+        onSave={async (status) => {
+          await onUpdateStatus(statusModalContract.id, status);
+          setStatusModalContract(null);
+        }}
+      />
+    )}
+
+    {confirmDelete && (
+      <ConfirmDialog
+        message={`ยืนยันการลบข้อมูล "${confirmDelete.contract_name}" ใช่หรือไม่?`}
+        confirmLabel="ลบ"
+        danger
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => {
+          onDelete(confirmDelete.id);
+          setConfirmDelete(null);
+        }}
+      />
+    )}
     </>
   );
 }

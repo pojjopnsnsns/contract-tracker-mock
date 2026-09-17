@@ -1,9 +1,9 @@
 const BLOCKS = [
   { key: 'total', label: 'สัญญาทั้งหมด', tone: 'blue', icon: '📄' },
   { key: 'overdue', label: 'เกินกำหนด', tone: 'red', icon: '⏰' },
-  { key: 'critical', label: 'วิกฤต (≤30 วัน)', tone: 'critical', icon: '🔥' },
+  { key: 'critical', label: 'เร่งดำเนินการ (≤30 วัน)', tone: 'critical', icon: '🔥' },
   { key: 'urgent', label: 'เร่งด่วน (≤60 วัน)', tone: 'urgent', icon: '🚨' },
-  { key: 'warning', label: 'เฝ้าระวัง (≤90 วัน)', tone: 'warn', icon: '⚠️' },
+  { key: 'warning', label: 'ใกล้ครบกำหนด (≤90 วัน)', tone: 'warn', icon: '⚠️' },
   { key: 'ok', label: 'ปกติ', tone: 'green', icon: '✅' },
 ];
 

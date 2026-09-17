@@ -11,7 +11,7 @@ function formatTime(iso) {
   return d.toLocaleString('th-TH', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
-export default function NotificationBell({ notifications, unseenCount, onRefresh, onMarkSeen, onMarkAllSeen }) {
+export default function NotificationBell({ notifications, unseenCount, onRefresh, onMarkSeen, onMarkAllSeen, onNotificationClick }) {
   const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
 
@@ -27,6 +27,12 @@ export default function NotificationBell({ notifications, unseenCount, onRefresh
     const next = !open;
     setOpen(next);
     if (next) await onRefresh();
+  }
+
+  function handleItemClick(n) {
+    if (!n.seen) onMarkSeen(n.id);
+    setOpen(false);
+    onNotificationClick?.(n);
   }
 
   return (
@@ -55,7 +61,7 @@ export default function NotificationBell({ notifications, unseenCount, onRefresh
               <div
                 key={n.id}
                 className={`notif-item ${!n.seen ? 'notif-item--unseen' : ''}`}
-                onClick={() => !n.seen && onMarkSeen(n.id)}
+                onClick={() => handleItemClick(n)}
               >
                 <div className="notif-item__top">
                   <span className="notif-item__threshold">{thresholdLabel(n.threshold_days)}</span>

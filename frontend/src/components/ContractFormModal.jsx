@@ -7,16 +7,31 @@ const STATUS_OPTIONS = [
   'Expired/Not renewed',
 ];
 
+const CONTRACT_TYPE_OPTIONS = [
+  { value: 'Master', label: 'Master (สัญญาหลัก)' },
+  { value: 'Amendment', label: 'Amendment (สัญญาย่อย - แก้ไข)' },
+  { value: 'Addendum', label: 'Addendum (สัญญาย่อย - เพิ่มเติม)' },
+];
+
 const EMPTY = {
   contract_name: '', service_type: '', country: '', partner: '', customer: '',
   effective_date: '', start_date: '', end_date: '', responsible_by: '',
   status: 'Upcoming renewal', cost_amount: '', cost_currency: 'THB', note: '', remark: '',
+  contract_type: 'Master', parent_contract_id: '',
 };
 
-export default function ContractFormModal({ initial, onSave, onClose }) {
+export default function ContractFormModal({ initial, contracts, onSave, onClose }) {
   const [form, setForm] = useState(initial ? { ...EMPTY, ...initial } : EMPTY);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const isSubContract = form.contract_type === 'Amendment' || form.contract_type === 'Addendum';
+
+  // Only true Master contracts can be picked as a parent, and a contract can't
+  // be its own parent when editing.
+  const masterOptions = (contracts || []).filter(
+    (c) => (c.contract_type || 'Master') === 'Master' && c.id !== initial?.id
+  );
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -26,6 +41,7 @@ export default function ContractFormModal({ initial, onSave, onClose }) {
     e.preventDefault();
     if (!form.contract_name.trim()) return setError('กรุณากรอกชื่อสัญญา');
     if (!form.end_date) return setError('กรุณาระบุวันที่ครบกำหนด');
+    if (isSubContract && !form.parent_contract_id) return setError('กรุณาเลือกสัญญาหลัก (Master) ที่สัญญานี้สังกัดอยู่');
 
     setError('');
     setSaving(true);
@@ -33,6 +49,7 @@ export default function ContractFormModal({ initial, onSave, onClose }) {
       await onSave({
         ...form,
         cost_amount: form.cost_amount === '' ? null : Number(form.cost_amount),
+        parent_contract_id: isSubContract ? Number(form.parent_contract_id) : null,
       });
     } catch (err) {
       setError(err.message);
@@ -56,6 +73,30 @@ export default function ContractFormModal({ initial, onSave, onClose }) {
               ชื่อสัญญา *
               <input value={form.contract_name} onChange={(e) => set('contract_name', e.target.value)} />
             </label>
+            <label>
+              ประเภทสัญญา
+              <select value={form.contract_type} onChange={(e) => set('contract_type', e.target.value)}>
+                {CONTRACT_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </label>
+
+            {isSubContract && (
+              <label className="form-wide">
+                สัญญาหลัก (Master) *
+                <select value={form.parent_contract_id || ''} onChange={(e) => set('parent_contract_id', e.target.value)}>
+                  <option value="">-- เลือกสัญญาหลัก --</option>
+                  {masterOptions.map((c) => (
+                    <option key={c.id} value={c.id}>{c.contract_name}</option>
+                  ))}
+                </select>
+                {masterOptions.length === 0 && (
+                  <span style={{ fontSize: '11.5px', color: 'var(--ink-muted)', marginTop: '4px' }}>
+                    ยังไม่มีสัญญา Master ในระบบ - สร้างสัญญาหลักก่อนจึงจะเพิ่ม Amendment/Addendum ได้
+                  </span>
+                )}
+              </label>
+            )}
+
             <label>
               ประเภทบริการ
               <input value={form.service_type} onChange={(e) => set('service_type', e.target.value)} />
@@ -87,6 +128,11 @@ export default function ContractFormModal({ initial, onSave, onClose }) {
             <label>
               วันที่ครบกำหนด *
               <input type="date" value={form.end_date || ''} onChange={(e) => set('end_date', e.target.value)} />
+              {isSubContract && (
+                <span style={{ fontSize: '11px', color: 'var(--ink-muted)' }}>
+                  วันที่นี้จะอัปเดตไปยังสัญญาหลักที่เลือกไว้ด้วย
+                </span>
+              )}
             </label>
             <label>
               สถานะ

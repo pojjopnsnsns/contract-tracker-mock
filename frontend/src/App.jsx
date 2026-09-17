@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback, Suspense, lazy } from 'react';
 import { api } from './api.js';
-import Topbar from './components/Topbar.jsx';
+import Sidebar from './components/Topbar.jsx';
 import FilterBar from './components/FilterBar.jsx';
 import ContractsTable from './components/ContractsTable.jsx';
 import ContractFormModal from './components/ContractFormModal.jsx';
@@ -13,6 +13,8 @@ const PAGE_TITLES = {
   dashboard: { eyebrow: 'ภาพรวม', title: 'สรุปภาพรวมสัญญา' },
 };
 
+const EMPTY_FILTERS = { search: '', status: '', alertLevel: '', serviceType: '', country: '' };
+
 export default function App() {
   const [contracts, setContracts] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -20,8 +22,10 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState('dashboard');
+  const [navHistory, setNavHistory] = useState([]);
+  const [highlightId, setHighlightId] = useState(null);
 
-  const [filters, setFilters] = useState({ search: '', status: '', alertLevel: '', serviceType: '', country: '' });
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [modalContract, setModalContract] = useState(null); // null = closed, {} = new, {...} = edit
   const [toast, setToast] = useState('');
 
@@ -53,6 +57,26 @@ export default function App() {
     setTimeout(() => setToast(''), 2500);
   }
 
+  // Central navigation helper: remembers where we came from (page + filters)
+  // so the back button can restore it exactly.
+  function goTo(newPage, opts = {}) {
+    setNavHistory((h) => [...h, { page, filters }]);
+    if (opts.filters) setFilters(opts.filters);
+    if ('highlightId' in opts) setHighlightId(opts.highlightId);
+    setPage(newPage);
+  }
+
+  function goBack() {
+    setNavHistory((h) => {
+      if (h.length === 0) return h;
+      const prev = h[h.length - 1];
+      setPage(prev.page);
+      setFilters(prev.filters);
+      setHighlightId(null);
+      return h.slice(0, -1);
+    });
+  }
+
   async function handleSave(data) {
     if (modalContract && modalContract.id) {
       await api.updateContract(modalContract.id, data);
@@ -71,6 +95,12 @@ export default function App() {
     await loadContracts();
   }
 
+  async function handleUpdateStatus(id, status) {
+    await api.updateContract(id, { status });
+    showToast('อัปเดตสถานะแล้ว');
+    await loadContracts();
+  }
+
   async function handleMarkSeen(id) {
     await api.markSeen(id);
     await loadNotifications();
@@ -82,8 +112,15 @@ export default function App() {
   }
 
   function handleSummaryCardClick(key) {
-    setFilters((f) => ({ ...f, alertLevel: key === 'total' ? '' : key }));
-    setPage('contracts');
+    goTo('contracts', { filters: { ...EMPTY_FILTERS, alertLevel: key === 'total' ? '' : key } });
+  }
+
+  function handleNotificationClick(n) {
+    if (!n.contract_id) return;
+    goTo('contracts', {
+      filters: { ...EMPTY_FILTERS, search: n.contract_name || '' },
+      highlightId: n.contract_id,
+    });
   }
 
   const serviceTypes = useMemo(
@@ -114,23 +151,34 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Topbar activePage={page} onNavigate={setPage} />
+      <Sidebar activePage={page} onNavigate={(p) => goTo(p)} />
 
       <div className="app">
         <header className="app-header">
           <div className="app-header__title">
+            {navHistory.length > 0 && (
+              <button className="back-btn" onClick={goBack}>← ย้อนกลับ</button>
+            )}
             <span className="app-header__eyebrow">{eyebrow}</span>
             <h1>{title}</h1>
           </div>
-          <NotificationBell
-            notifications={notifications}
-            unseenCount={unseenCount}
-            onRefresh={async () => {
-              await Promise.all([loadContracts(), loadNotifications()]);
-            }}
-            onMarkSeen={handleMarkSeen}
-            onMarkAllSeen={handleMarkAllSeen}
-          />
+          <div className="app-header__actions">
+            {page === 'dashboard' && (
+              <button className="btn btn--primary" onClick={() => setModalContract({})}>
+                + เพิ่มสัญญาใหม่
+              </button>
+            )}
+            <NotificationBell
+              notifications={notifications}
+              unseenCount={unseenCount}
+              onRefresh={async () => {
+                await Promise.all([loadContracts(), loadNotifications()]);
+              }}
+              onMarkSeen={handleMarkSeen}
+              onMarkAllSeen={handleMarkAllSeen}
+              onNotificationClick={handleNotificationClick}
+            />
+          </div>
         </header>
 
         <main className="app-main">
@@ -155,8 +203,12 @@ export default function App() {
 
               <ContractsTable
                 contracts={filtered}
+                allContracts={contracts}
                 onEdit={(c) => setModalContract(c)}
                 onDelete={handleDelete}
+                onUpdateStatus={handleUpdateStatus}
+                highlightId={highlightId}
+                onHighlightConsumed={() => setHighlightId(null)}
               />
             </>
           )}
@@ -165,6 +217,7 @@ export default function App() {
         {modalContract !== null && (
           <ContractFormModal
             initial={modalContract.id ? modalContract : null}
+            contracts={contracts}
             onSave={handleSave}
             onClose={() => setModalContract(null)}
           />

@@ -51,6 +51,38 @@ app.get('/api/contracts/:id', ah(async (req, res) => {
   res.json(withAlert(rows[0]));
 }));
 
+// If this contract is an Amendment/Addendum with a parent, the parent Master's
+// end_date follows the amendment's end_date (an amendment is what extends or
+// changes when the underlying master contract actually expires).
+// If this contract is an Amendment/Addendum with a parent, the parent Master's
+// end_date follows whichever Amendment/Addendum was ADDED MOST RECENTLY (by
+// creation order) - the latest instrument governs the current term, even if
+// an earlier amendment happened to specify a later date. Editing an OLDER
+// amendment's date afterward doesn't change which one is "latest" (creation
+// order is fixed), so it can't retroactively override a newer amendment.
+async function cascadeEndDateToParent(contract) {
+  if (!['Amendment', 'Addendum'].includes(contract.contract_type)) return;
+  if (!contract.parent_contract_id) return;
+  await recomputeParentEndDate(contract.parent_contract_id);
+}
+
+async function recomputeParentEndDate(parentId) {
+  const { rows } = await pool.query(
+    `SELECT end_date FROM contracts
+     WHERE parent_contract_id = $1 AND contract_type IN ('Amendment', 'Addendum') AND end_date IS NOT NULL
+     ORDER BY created_at DESC, id DESC
+     LIMIT 1`,
+    [parentId]
+  );
+  const latestEndDate = rows[0]?.end_date;
+  if (!latestEndDate) return; // no amendments with a date left - leave the master's current end_date as-is
+
+  await pool.query(
+    'UPDATE contracts SET end_date = $1, updated_at = now() WHERE id = $2',
+    [latestEndDate, parentId]
+  );
+}
+
 app.post('/api/contracts', ah(async (req, res) => {
   const b = req.body;
   if (!b.contract_name) return res.status(400).json({ error: 'contract_name is required' });
@@ -59,15 +91,17 @@ app.post('/api/contracts', ah(async (req, res) => {
     INSERT INTO contracts
       (service_type, contract_name, country, partner, customer, note,
        effective_date, start_date, end_date, responsible_by, remark, status,
-       cost_amount, cost_currency)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+       cost_amount, cost_currency, contract_type, parent_contract_id, original_end_date)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
     RETURNING *
   `, [
     b.service_type || null, b.contract_name, b.country || null, b.partner || null,
     b.customer || null, b.note || null, b.effective_date || null, b.start_date || null,
     b.end_date || null, b.responsible_by || null, b.remark || null,
     b.status || 'Upcoming renewal', b.cost_amount ?? null, b.cost_currency || 'THB',
+    b.contract_type || 'Master', b.parent_contract_id || null, b.end_date || null,
   ]);
+  await cascadeEndDateToParent(rows[0]);
   res.status(201).json(withAlert(rows[0]));
 }));
 
@@ -80,20 +114,42 @@ app.put('/api/contracts/:id', ah(async (req, res) => {
     UPDATE contracts SET
       service_type=$1, contract_name=$2, country=$3, partner=$4, customer=$5, note=$6,
       effective_date=$7, start_date=$8, end_date=$9, responsible_by=$10, remark=$11,
-      status=$12, cost_amount=$13, cost_currency=$14, updated_at=now()
-    WHERE id=$15
+      status=$12, cost_amount=$13, cost_currency=$14, contract_type=$15, parent_contract_id=$16,
+      updated_at=now()
+    WHERE id=$17
     RETURNING *
   `, [
     merged.service_type, merged.contract_name, merged.country, merged.partner, merged.customer,
     merged.note, merged.effective_date, merged.start_date, merged.end_date, merged.responsible_by,
-    merged.remark, merged.status, merged.cost_amount, merged.cost_currency, req.params.id,
+    merged.remark, merged.status, merged.cost_amount, merged.cost_currency,
+    merged.contract_type, merged.parent_contract_id, req.params.id,
   ]);
-  res.json(withAlert(rows[0]));
+  await cascadeEndDateToParent(rows[0]);
+
+  // If the contract just saved is itself a Master, re-derive its end_date
+  // from its latest Amendment/Addendum right away. Without this, editing a
+  // Master for any unrelated reason (e.g. remark) re-submits the end_date
+  // the edit form loaded at open time, silently overwriting whatever an
+  // amendment had already extended it to.
+  let finalContract = rows[0];
+  if ((rows[0].contract_type || 'Master') === 'Master') {
+    await recomputeParentEndDate(rows[0].id);
+    const { rows: refetched } = await pool.query('SELECT * FROM contracts WHERE id = $1', [rows[0].id]);
+    finalContract = refetched[0];
+  }
+
+  res.json(withAlert(finalContract));
 }));
 
 app.delete('/api/contracts/:id', ah(async (req, res) => {
+  const { rows: existingRows } = await pool.query('SELECT * FROM contracts WHERE id = $1', [req.params.id]);
   const { rowCount } = await pool.query('DELETE FROM contracts WHERE id = $1', [req.params.id]);
   if (rowCount === 0) return res.status(404).json({ error: 'Not found' });
+
+  const deleted = existingRows[0];
+  if (deleted && ['Amendment', 'Addendum'].includes(deleted.contract_type) && deleted.parent_contract_id) {
+    await recomputeParentEndDate(deleted.parent_contract_id);
+  }
   res.status(204).end();
 }));
 
@@ -256,7 +312,7 @@ app.post('/api/notify/run-now', ah(async (req, res) => {
 }));
 
 // Daily at 08:00 server time - sends nothing on channels that aren't configured
-cron.schedule('0 1 * * *', () => {
+cron.schedule('0 8 * * *', () => {
   runDailyAlertCheck().catch(err => console.error('Daily alert check failed:', err));
 });
 

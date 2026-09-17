@@ -6,18 +6,18 @@ import TopExpiringList from './TopExpiringList.jsx';
 import CountryRankList from './CountryRankList.jsx';
 
 const ALERT_COLORS = {
-  overdue: '#ff9999',  // แดงพาสเทล (เลยกำหนด)
-  critical: '#ffb380', // ส้มอมแดงพาสเทล (วิกฤต)
-  urgent: '#ffc966',   // ส้มเหลืองพาสเทล (เร่งด่วน)
-  warning: '#ffd666',  // เหลืองพาสเทล (เตือน)
-  ok: '#79dcab',       // เขียวพาสเทล (ปกติ/เรียบร้อย)
+  overdue: '#ff5b5b',
+  critical: '#ff7d33',
+  urgent: '#ff9d2e',
+  warning: '#ffa412',
+  ok: '#37c17e',
 };
 
 const STATUS_COLORS = {
-  'Upcoming renewal': '#ffd666',         // เหลืองพาสเทล (เทียบเท่า warning)
-  'Negotiation in progress': '#8fb4ff',  // ฟ้าพาสเทล (ดูนุ่มนวลขึ้นจากน้ำเงินเข้มเดิม)
-  'Renewed': '#79dcab',                  // เขียวพาสเทล (เทียบเท่า ok)
-  'Expired/Not renewed': '#ff9999',      // แดงพาสเทล (เทียบเท่า overdue)
+  'Upcoming renewal': '#ffa412',
+  'Negotiation in progress': '#4b7bec',
+  'Renewed': '#37c17e',
+  'Expired/Not renewed': '#ff5b5b',
 };
 
 function countBy(items, key) {
@@ -87,6 +87,7 @@ export default function DashboardPage({ contracts, onCardClick }) {
 
         <CountryRankList data={byCountry} />
       </div>
+
     </div>
   );
 }
