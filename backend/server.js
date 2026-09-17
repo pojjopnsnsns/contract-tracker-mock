@@ -256,7 +256,7 @@ app.post('/api/notify/run-now', ah(async (req, res) => {
 }));
 
 // Daily at 08:00 server time - sends nothing on channels that aren't configured
-cron.schedule('0 8 * * *', () => {
+cron.schedule('0 1 * * *', () => {
   runDailyAlertCheck().catch(err => console.error('Daily alert check failed:', err));
 });
 
