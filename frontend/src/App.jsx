@@ -5,6 +5,7 @@ import FilterBar from './components/FilterBar.jsx';
 import ContractsTable from './components/ContractsTable.jsx';
 import ContractFormModal from './components/ContractFormModal.jsx';
 import NotificationBell from './components/NotificationBell.jsx';
+import LoginPage from './components/LoginPage.jsx';
 
 const DashboardPage = lazy(() => import('./components/DashboardPage.jsx'));
 
@@ -16,6 +17,9 @@ const PAGE_TITLES = {
 const EMPTY_FILTERS = { search: '', status: '', alertLevel: '', serviceType: '', country: '' };
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
   const [contracts, setContracts] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [unseenCount, setUnseenCount] = useState(0);
@@ -29,6 +33,25 @@ export default function App() {
   const [modalContract, setModalContract] = useState(null); // null = closed, {} = new, {...} = edit
   const [toast, setToast] = useState('');
 
+  // A 401 from any API call means the session is gone - drop back to login
+  // from wherever the user happens to be, instead of showing a broken page.
+  useEffect(() => {
+    api.setUnauthorizedHandler(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { user } = await api.me();
+        setUser(user);
+      } catch {
+        // Not logged in - LoginPage will render once authChecked is true.
+      } finally {
+        setAuthChecked(true);
+      }
+    })();
+  }, []);
+
   const loadContracts = useCallback(async () => {
     const data = await api.listContracts();
     setContracts(data);
@@ -41,7 +64,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     (async () => {
+      setLoading(true);
       try {
         await Promise.all([loadContracts(), loadNotifications()]);
       } catch (err) {
@@ -50,11 +75,19 @@ export default function App() {
         setLoading(false);
       }
     })();
-  }, [loadContracts, loadNotifications]);
+  }, [user, loadContracts, loadNotifications]);
 
   function showToast(msg) {
     setToast(msg);
     setTimeout(() => setToast(''), 2500);
+  }
+
+  async function handleLogout() {
+    try {
+      await api.logout();
+    } finally {
+      setUser(null);
+    }
   }
 
   // Central navigation helper: remembers where we came from (page + filters)
@@ -147,6 +180,17 @@ export default function App() {
     });
   }, [contracts, filters]);
 
+  if (!authChecked) {
+    return <div className="login-page"><p className="loading-text">กำลังตรวจสอบสิทธิ์...</p></div>;
+  }
+
+  if (!user) {
+    return <LoginPage onLoggedIn={setUser} />;
+  }
+
+  const canWrite = user.role === 'admin' || user.role === 'editor';
+  const canDelete = user.role === 'admin';
+
   const { eyebrow, title } = PAGE_TITLES[page];
 
   return (
@@ -163,7 +207,7 @@ export default function App() {
             <h1>{title}</h1>
           </div>
           <div className="app-header__actions">
-            {page === 'dashboard' && (
+            {page === 'dashboard' && canWrite && (
               <button className="btn btn--primary" onClick={() => setModalContract({})}>
                 + เพิ่มสัญญาใหม่
               </button>
@@ -178,6 +222,10 @@ export default function App() {
               onMarkAllSeen={handleMarkAllSeen}
               onNotificationClick={handleNotificationClick}
             />
+            <div className="user-menu">
+              <span className="user-menu__name">{user.username}</span>
+              <button className="link-btn" onClick={handleLogout}>ออกจากระบบ</button>
+            </div>
           </div>
         </header>
 
@@ -199,6 +247,7 @@ export default function App() {
                 serviceTypes={serviceTypes}
                 countries={countries}
                 onAddClick={() => setModalContract({})}
+                canWrite={canWrite}
               />
 
               <ContractsTable
@@ -209,6 +258,8 @@ export default function App() {
                 onUpdateStatus={handleUpdateStatus}
                 highlightId={highlightId}
                 onHighlightConsumed={() => setHighlightId(null)}
+                canWrite={canWrite}
+                canDelete={canDelete}
               />
             </>
           )}

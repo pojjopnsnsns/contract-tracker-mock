@@ -18,6 +18,15 @@ function installAuth(app, pool, ah) {
   const cookieOptions = { httpOnly:true, sameSite:'strict', secure:process.env.NODE_ENV==='production', path:'/' };
   const publicOrigin = process.env.PUBLIC_ORIGIN || 'http://localhost:4000';
   const trusted = new Set([publicOrigin,...(process.env.CORS_ORIGINS || '').split(',').map(s=>s.trim()).filter(Boolean)]);
+  //Allow try.cloudflare
+  function originAllowed(req) { 
+    const origin = req.get('Origin');
+    if (!origin) return false;
+    if (trusted.has(origin)) return true;
+    if (origin.endsWith('.trycloudflare.com')) return true;
+    if (origin.startsWith('http://localhost:')) return true;
+    return false;
+  }
   function originAllowed(req) { return req.get('Origin') && trusted.has(req.get('Origin')); }
   app.post('/api/auth/login', ah(async(req,res)=>{
     if (!originAllowed(req)) return res.status(403).json({error:'Untrusted or missing Origin'});

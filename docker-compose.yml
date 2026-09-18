@@ -3,12 +3,12 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --protocol http2 --url http://frontend:80
+    command: tunnel --protocol http2 --url http://contract-tracker-frontend:80
 
   cloudflared-api:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --protocol http2 --url http://backend:4000
+    command: tunnel --protocol http2 --url http://contract-tracker-backend:4000
 
   postgres:
     image: postgres:16-alpine
@@ -41,6 +41,22 @@ services:
       - PGUSER=postgres
       - PGPASSWORD=postgres
       - PGDATABASE=contract_tracker
+      # Seed the mock CSV on first run, and run the daily 08:00 alert check -
+      # both are opt-in now (server.js checks these explicitly).
+      - SEED_MOCK_DATA=true
+      - ENABLE_DAILY_ALERTS=true
+      - CORS_ORIGINS=http://localhost:5173,https://survival-smtp-requests-textbooks.trycloudflare.com/ # original: http://localhost:5173
+      - PUBLIC_ORIGIN=http://localhost:4000
+      # auth.js checks the request's Origin header against this list for every
+      # state-changing request (login included) - without it, login fails with
+      # 403 "Untrusted or missing Origin" even with correct credentials.
+      # For local `docker compose up` testing at http://localhost:5173, this is
+      # correct as-is. For the Cloudflare quick-tunnel deployment below, the
+      # frontend's tunnel URL is RANDOM and changes every restart (quick
+      # tunnels have no fixed hostname) - update this to match it after each
+      # restart, or switch to a named Cloudflare Tunnel for a stable URL.
+      - CORS_ORIGINS=http://localhost:5173
+      - PUBLIC_ORIGIN=http://localhost:4000
       # Optional LINE Notify push - leave unset to disable
       - LINE_CHANNEL_ACCESS_TOKEN=
       - LINE_TARGET_ID=
@@ -61,7 +77,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE: https://freebsd-containing-identification-stat.trycloudflare.com # original: http:localhost:4000
+        VITE_API_BASE: https://gathered-limiting-cell-rap.trycloudflare.com # original: http://localhost:4000
     container_name: contract-tracker-frontend
     ports:
       - "5173:80"
@@ -70,3 +86,7 @@ services:
     restart: unless-stopped
 volumes:
   contract-tracker-pgdata:
+
+networks:
+ app-network:
+  driver: bridge

@@ -1,0 +1,190 @@
+/* ==========================================================================
+   Contract Tracker — Login
+   Uses the shared design tokens from styles.css (--bg, --card, --ink,
+   --primary, --border, --radius, --shadow, --font-ui, …) so this page reads
+   as the front door of the same app, not a separate product.
+   ========================================================================== */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+
+/* ---- card -------------------------------------------------------------- */
+
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px 32px;
+  box-shadow: var(--shadow-lg);
+}
+
+.login-card__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.login-card__logo {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(11, 61, 145, 0.18);
+}
+
+.login-card__title {
+  margin: 0 0 3px;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.login-card__subtitle {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/* ---- error -------------------------------------------------------------- */
+/* Uses the shared .form-error look (var(--red-bg)/var(--red)); this page
+   just adds the icon layout on top of it. */
+
+.login-page .form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.login-page .form-error svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* ---- fields -------------------------------------------------------------- */
+
+.login-card__field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.login-card__label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: #44516a;
+}
+
+.login-card__field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  font: inherit;
+  font-size: var(--fs-md);
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-card__field input::placeholder {
+  color: var(--ink-muted);
+}
+
+.login-card__field input:hover {
+  border-color: #c7d0df;
+}
+
+.login-card__field input:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.login-card__password-wrap {
+  position: relative;
+}
+
+.login-card__password-wrap input {
+  padding-right: 42px;
+}
+
+.login-card__toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.login-card__toggle:hover {
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.login-card__toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* ---- submit -------------------------------------------------------------- */
+/* Colors/hover come from the shared .btn / .btn--primary classes already
+   on the element in the JSX; this only adds the full-width layout. */
+
+.login-card__submit {
+  width: 100%;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.login-card__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-card__spinner {
+    animation: none;
+  }
+}
+
+/* ---- small screens -------------------------------------------------------------- */
+
+@media (max-width: 420px) {
+  .login-card { padding: 28px 22px 26px; }
+}
