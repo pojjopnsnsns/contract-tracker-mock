@@ -52,14 +52,11 @@ app.get('/api/contracts/:id', ah(async (req, res) => {
 }));
 
 // If this contract is an Amendment/Addendum with a parent, the parent Master's
-// end_date follows the amendment's end_date (an amendment is what extends or
-// changes when the underlying master contract actually expires).
-// If this contract is an Amendment/Addendum with a parent, the parent Master's
-// end_date follows whichever Amendment/Addendum was ADDED MOST RECENTLY (by
-// creation order) - the latest instrument governs the current term, even if
-// an earlier amendment happened to specify a later date. Editing an OLDER
-// amendment's date afterward doesn't change which one is "latest" (creation
-// order is fixed), so it can't retroactively override a newer amendment.
+// end_date AND status follow the MOST RECENTLY ADDED Amendment/Addendum among
+// ALL of its sub-contracts - not a "furthest date wins" comparison. Editing an
+// amendment's own end_date afterward doesn't change which one is "latest"
+// (creation order is fixed), so it can't retroactively override a newer amendment.
+// If a Master has no Amendment/Addendum at all, it simply keeps its own values.
 async function cascadeEndDateToParent(contract) {
   if (!['Amendment', 'Addendum'].includes(contract.contract_type)) return;
   if (!contract.parent_contract_id) return;
@@ -68,18 +65,26 @@ async function cascadeEndDateToParent(contract) {
 
 async function recomputeParentEndDate(parentId) {
   const { rows } = await pool.query(
-    `SELECT end_date FROM contracts
-     WHERE parent_contract_id = $1 AND contract_type IN ('Amendment', 'Addendum') AND end_date IS NOT NULL
+    `SELECT end_date, status FROM contracts
+     WHERE parent_contract_id = $1 AND contract_type IN ('Amendment', 'Addendum')
      ORDER BY created_at DESC, id DESC
      LIMIT 1`,
     [parentId]
   );
-  const latestEndDate = rows[0]?.end_date;
-  if (!latestEndDate) return; // no amendments with a date left - leave the master's current end_date as-is
+  const latest = rows[0];
+  if (!latest) return; // no amendments left - leave the master's own end_date/status as-is
 
+  const fields = [];
+  const values = [];
+  let i = 1;
+  if (latest.end_date) { fields.push(`end_date = $${i++}`); values.push(latest.end_date); }
+  if (latest.status) { fields.push(`status = $${i++}`); values.push(latest.status); }
+  if (fields.length === 0) return;
+
+  values.push(parentId);
   await pool.query(
-    'UPDATE contracts SET end_date = $1, updated_at = now() WHERE id = $2',
-    [latestEndDate, parentId]
+    `UPDATE contracts SET ${fields.join(', ')}, updated_at = now() WHERE id = $${i}`,
+    values
   );
 }
 
@@ -125,20 +130,7 @@ app.put('/api/contracts/:id', ah(async (req, res) => {
     merged.contract_type, merged.parent_contract_id, req.params.id,
   ]);
   await cascadeEndDateToParent(rows[0]);
-
-  // If the contract just saved is itself a Master, re-derive its end_date
-  // from its latest Amendment/Addendum right away. Without this, editing a
-  // Master for any unrelated reason (e.g. remark) re-submits the end_date
-  // the edit form loaded at open time, silently overwriting whatever an
-  // amendment had already extended it to.
-  let finalContract = rows[0];
-  if ((rows[0].contract_type || 'Master') === 'Master') {
-    await recomputeParentEndDate(rows[0].id);
-    const { rows: refetched } = await pool.query('SELECT * FROM contracts WHERE id = $1', [rows[0].id]);
-    finalContract = refetched[0];
-  }
-
-  res.json(withAlert(finalContract));
+  res.json(withAlert(rows[0]));
 }));
 
 app.delete('/api/contracts/:id', ah(async (req, res) => {

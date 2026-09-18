@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SearchableSelect from './SearchableSelect.jsx';
 
 const STATUS_OPTIONS = [
   'Upcoming renewal',
@@ -83,14 +84,14 @@ export default function ContractFormModal({ initial, contracts, onSave, onClose 
             {isSubContract && (
               <label className="form-wide">
                 สัญญาหลัก (Master) *
-                <select value={form.parent_contract_id || ''} onChange={(e) => set('parent_contract_id', e.target.value)}>
-                  <option value="">-- เลือกสัญญาหลัก --</option>
-                  {masterOptions.map((c) => (
-                    <option key={c.id} value={c.id}>{c.contract_name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={masterOptions.map((c) => ({ value: c.id, label: c.contract_name }))}
+                  value={form.parent_contract_id}
+                  onChange={(v) => set('parent_contract_id', v)}
+                  placeholder="-- เลือกสัญญาหลัก --"
+                />
                 {masterOptions.length === 0 && (
-                  <span style={{ fontSize: '11.5px', color: 'var(--ink-muted)', marginTop: '4px' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-muted)', marginTop: '4px' }}>
                     ยังไม่มีสัญญา Master ในระบบ - สร้างสัญญาหลักก่อนจึงจะเพิ่ม Amendment/Addendum ได้
                   </span>
                 )}
@@ -129,7 +130,7 @@ export default function ContractFormModal({ initial, contracts, onSave, onClose 
               วันที่ครบกำหนด *
               <input type="date" value={form.end_date || ''} onChange={(e) => set('end_date', e.target.value)} />
               {isSubContract && (
-                <span style={{ fontSize: '11px', color: 'var(--ink-muted)' }}>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-muted)' }}>
                   วันที่นี้จะอัปเดตไปยังสัญญาหลักที่เลือกไว้ด้วย
                 </span>
               )}

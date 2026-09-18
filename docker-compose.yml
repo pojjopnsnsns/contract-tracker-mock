@@ -3,12 +3,12 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --url http://frontend:80
+    command: tunnel --protocol http2 --url http://frontend:80
 
   cloudflared-api:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --url http://backend:4000
+    command: tunnel --protocol http2 --url http://backend:4000
 
   postgres:
     image: postgres:16-alpine
@@ -61,7 +61,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE: https://teach-sight-impression-palm.trycloudflare.com # original: http:localhost:4000
+        VITE_API_BASE: https://freebsd-containing-identification-stat.trycloudflare.com # original: http:localhost:4000
     container_name: contract-tracker-frontend
     ports:
       - "5173:80"

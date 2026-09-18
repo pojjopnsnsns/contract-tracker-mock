@@ -74,6 +74,7 @@ export default function ContractsTable({
   const [page, setPage] = useState(1);
   const [statusModalContract, setStatusModalContract] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [expandedChildIds, setExpandedChildIds] = useState({});
   const [visualHighlight, setVisualHighlight] = useState(null);
 
   const sorted = useMemo(() => {
@@ -130,6 +131,10 @@ export default function ContractsTable({
 
   function toggleExpand(id) {
     setExpandedId((cur) => (cur === id ? null : id));
+  }
+
+  function toggleChild(id) {
+    setExpandedChildIds((cur) => ({ ...cur, [id]: !cur[id] }));
   }
 
   function handleSort(key) {
@@ -249,11 +254,7 @@ export default function ContractsTable({
                         </div>
                         <div>
                           <span className="detail-label">วันสิ้นสุดสัญญา</span>
-                          <span className="mono">{c.original_end_date || '-'}</span>
-                        </div>
-                        <div>
-                          <span className="detail-label">วันสิ้นสุดสัญญา (ขยาย)</span>
-                          <span className="mono">{c.end_date || '-'}</span>
+                          <span className="mono">{(type === 'Master' ? c.original_end_date : c.end_date) || '-'}</span>
                         </div>
                         <div className="detail-wide">
                           <span className="detail-label">หมายเหตุ</span>
@@ -269,20 +270,86 @@ export default function ContractsTable({
                         <div className="detail-subcontracts">
                           <span className="detail-label">Sub-contract (Amendment/Addendum)</span>
                           <div className="subcontract-list">
-                            {children.map((k) => (
-                              <div
-                                key={k.id}
-                                className="subcontract-item"
-                                onClick={() => onEdit(k)}
-                              >
-                                <span className="type-badge">{TYPE_LABEL[k.contract_type] || k.contract_type}</span>
-                                <span className="subcontract-name" title={k.contract_name}>{k.contract_name}</span>
-                                <span className="mono">{k.end_date || '-'}</span>
-                                <span className={`status-chip status--${statusTone(k.status)}`}>
-                                  {k.status || '-'}
-                                </span>
-                              </div>
-                            ))}
+                            <div className="subcontract-item subcontract-item--header">
+                              <span></span>
+                              <span></span>
+                              <span>ชื่อสัญญา</span>
+                              <span>คู่สัญญา</span>
+                              <span>ประเทศ</span>
+                              <span>วันที่ครบกำหนด</span>
+                              <span className="num">คงเหลือ</span>
+                              <span>สถานะ</span>
+                              <span>ผู้รับผิดชอบ</span>
+                              <span className="num">มูลค่าสัญญา</span>
+                              <span></span>
+                            </div>
+                            {children.map((k) => {
+                              const childOpen = !!expandedChildIds[k.id];
+                              return (
+                                <div key={k.id} className="subcontract-card">
+                                  <div
+                                    className="subcontract-item"
+                                    onClick={() => toggleChild(k.id)}
+                                  >
+                                    <span className="hierarchy-toggle">{childOpen ? '▾' : '▸'}</span>
+                                    <span className="type-badge">{TYPE_LABEL[k.contract_type] || k.contract_type}</span>
+                                    <span className="subcontract-name" title={k.contract_name}>{k.contract_name}</span>
+                                    <span className="cell-clip" title={k.partner || ''}>{k.partner || '-'}</span>
+                                    <span className="cell-clip" title={k.country || ''}>{k.country || '-'}</span>
+                                    <span className="mono">{k.end_date || '-'}</span>
+                                    <span className="num">
+                                      <span className={`days-value days--${daysTone(k.days_until_end)}`}>
+                                        {formatDays(k.days_until_end)}
+                                      </span>
+                                    </span>
+                                    <span className={`status-chip status--${statusTone(k.status)}`}>
+                                      {k.status || '-'}
+                                    </span>
+                                    <span className="cell-clip" title={k.responsible_by || ''}>{k.responsible_by || '-'}</span>
+                                    <span className="num">{formatMoney(k.cost_amount, k.cost_currency)}</span>
+                                    <button
+                                      className="link-btn"
+                                      onClick={(e) => { e.stopPropagation(); onEdit(k); }}
+                                    >
+                                      แก้ไข
+                                    </button>
+                                  </div>
+
+                                  {childOpen && (
+                                    <div className="subcontract-detail detail-grid">
+                                      <div>
+                                        <span className="detail-label">ประเภทบริการ</span>
+                                        {k.service_type || '-'}
+                                      </div>
+                                      <div>
+                                        <span className="detail-label">หน่วยงาน / ลูกค้า</span>
+                                        {k.customer || '-'}
+                                      </div>
+                                      <div>
+                                        <span className="detail-label">วันที่มีผล</span>
+                                        {k.effective_date || '-'}
+                                      </div>
+                                      <div>
+                                        <span className="detail-label">วันที่เริ่มสัญญา</span>
+                                        {k.start_date || '-'}
+                                      </div>
+                                      <div>
+                                        <span className="detail-label">วันสิ้นสุดสัญญา</span>
+                                        <span className="mono">{k.end_date || '-'}</span>
+                                      </div>
+                                      <div className="detail-wide">
+                                        <span className="detail-label">หมายเหตุ</span>
+                                        {k.note || '-'}
+                                      </div>
+                                      <div className="detail-wide">
+                                        <span className="detail-label">Remark</span>
+                                        {k.remark || '-'}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}

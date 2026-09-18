@@ -1,9 +1,9 @@
 const TONE_COLOR = {
-  expired: '#ff5b5b',
-  critical: '#ff5b5b',
-  warn: '#ff7d33',
-  notice: '#ffa412',
-  safe: '#37c17e',
+  expired: 'var(--alert-overdue, #7e22ce)',
+  critical: 'var(--alert-critical, #c62828)',
+  warn: 'var(--alert-urgent, #b85c00)',
+  notice: 'var(--alert-warning, #0369a1)',
+  safe: 'var(--alert-ok, #15803d)',
 };
 
 function daysTone(days) {

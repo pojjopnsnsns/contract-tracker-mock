@@ -1,34 +1,45 @@
 :root {
-  /* BankDash-inspired palette: soft indigo accent, lavender page background,
-     white rounded cards with soft shadows. */
-  --bg: #f3f4fb;
+  /* Readable contract workspace: neutral surfaces and high-contrast accents. */
+  --bg: #f5f7fb;
   --card: #ffffff;
-  --ink: #1b1c39;
-  --ink-muted: #8a8ca8;
-  --border: #eceefa;
+  --ink: #18243b;
+  --ink-muted: #627089;
+  --border: #e2e7f0;
 
-  --primary: #6c5dd3;
-  --primary-light: #7d6fe0;
-  --primary-bg: #efecfb;
+  --primary: #5146b8;
+  --primary-light: #44389f;
+  --primary-bg: #eeecfa;
 
-  --amber: #ffa412;
-  --amber-bg: #fff4e2;
-  --orange: #ff7d33;
-  --orange-bg: #fff0e6;
-  --red: #ff5b5b;
-  --red-bg: #ffe9e9;
-  --green: #37c17e;
-  --green-bg: #e5f8ee;
-  --blue: #4b7bec;
-  --blue-bg: #e9f0ff;
+  --amber: #916000;
+  --amber-bg: #fff6df;
+  --orange: #b34f12;
+  --orange-bg: #fff0e5;
+  --red: #bd3342;
+  --red-bg: #fff0f1;
+  --green: #18774f;
+  --green-bg: #eaf7f0;
+  --blue: #315fbb;
+  --blue-bg: #edf3ff;
 
   --radius: 14px;
   --radius-sm: 10px;
   --shadow: 0 6px 20px rgba(35, 30, 90, 0.06);
   --shadow-lg: 0 16px 40px rgba(35, 30, 90, 0.14);
 
-  --font-ui: 'Sarabun', system-ui, sans-serif;
-  --font-mono: 'Sarabun', system-ui, sans-serif;
+  --font-ui: 'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif;
+
+  /* Font-size scale - everything in the app maps to one of these instead of
+     one-off values (there were 15 slightly-different sizes like 12/12.5/13/13.5px
+     scattered around before, which read as inconsistent even though the
+     differences were tiny). */
+  --fs-2xs: 11px;   /* micro badges/tags: type-badge, notif-badge */
+  --fs-xs: 12px;    /* meta/labels: eyebrow, detail-label, table headers */
+  --fs-sm: 14px;  /* secondary/interactive: buttons, pagination, status chips */
+  --fs-md: 15px;  /* primary content: table cells, form fields, list items */
+  --fs-lg: 18px;    /* modal/section headers */
+  --fs-xl: 28px;    /* page title */
+  --fs-2xl: 32px;   /* big KPI numbers */
 }
 
 * {
@@ -110,7 +121,7 @@ option {
 
 .sidebar__brand-text {
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--fs-md);
   line-height: 1.3;
   color: var(--ink);
   white-space: nowrap;
@@ -132,7 +143,7 @@ option {
   padding: 8px 14px;
   border-radius: var(--radius-sm);
   color: var(--ink-muted);
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
@@ -175,14 +186,14 @@ option {
 
 .app-header__eyebrow {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.06em;
   color: var(--ink-muted);
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 21px;
+  font-size: var(--fs-xl);
   font-weight: 700;
 }
 
@@ -197,7 +208,7 @@ option {
   border: none;
   background: none;
   color: var(--primary);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
   padding: 0 0 4px;
@@ -248,7 +259,7 @@ option {
 
 .chart-card__title {
   margin: 0 0 8px;
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   font-weight: 600;
   color: var(--ink);
 }
@@ -284,7 +295,7 @@ option {
 }
 
 .top-expiring__row--header {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--ink-muted);
   font-weight: 600;
   padding-top: 0;
@@ -293,12 +304,12 @@ option {
 
 .top-expiring__rank {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--ink-muted);
 }
 
 .top-expiring__name {
-  font-size: 13px;
+  font-size: var(--fs-md);
   font-weight: 500;
   white-space: normal;
   overflow-wrap: break-word;
@@ -327,7 +338,7 @@ option {
   padding: 3px 12px;
   border: 1px solid;
   border-radius: 999px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   font-family: var(--font-mono);
   white-space: nowrap;
@@ -382,12 +393,12 @@ option {
 
 .hierarchy-toggle {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   text-align: center;
 }
 
 .hierarchy-name {
-  font-size: 13px;
+  font-size: var(--fs-md);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -399,12 +410,12 @@ option {
 }
 
 .hierarchy-meta {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--ink-muted);
 }
 
 .hierarchy-date {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
 }
 
 @media (max-width: 720px) {
@@ -476,18 +487,18 @@ option {
 
 .summary-value {
   font-family: var(--font-mono);
-  font-size: 24px;
+  font-size: var(--fs-2xl);
   font-weight: 700;
   line-height: 1.1;
 }
 
 .summary-label {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--ink-muted);
 }
 
 .summary-pct {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--ink-muted);
   margin-top: 2px;
 }
@@ -515,7 +526,7 @@ option {
   background: var(--card);
   color: var(--ink);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-md);
 }
 
 .filter-bar select:focus,
@@ -541,7 +552,7 @@ option {
   background: var(--card);
   color: var(--ink);
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 
@@ -577,7 +588,7 @@ option {
   border: none;
   color: var(--primary);
   cursor: pointer;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   padding: 2px 4px;
   font-weight: 600;
 }
@@ -615,7 +626,7 @@ option {
 
 .contracts-table th {
   text-align: left;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   text-transform: none;
   color: var(--ink-muted);
   font-weight: 600;
@@ -642,7 +653,7 @@ option {
   display: inline-block;
   width: 10px;
   margin-left: 3px;
-  font-size: 9px;
+  font-size: var(--fs-2xs);
 }
 
 .contracts-table td {
@@ -650,6 +661,7 @@ option {
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
   white-space: nowrap;
+  font-size: var(--fs-md);
 }
 
 .contracts-table tbody tr:last-child td {
@@ -670,7 +682,7 @@ option {
 
 .mono {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
 }
 
 .cell-strong {
@@ -716,7 +728,7 @@ option {
   margin-left: 8px;
   padding: 1px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   background: var(--primary-bg);
   color: var(--primary);
@@ -742,7 +754,7 @@ option {
 
 .detail-label {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--ink-muted);
   margin-bottom: 2px;
 }
@@ -758,26 +770,57 @@ option {
   flex-direction: column;
   gap: 6px;
   margin-top: 8px;
+  overflow-x: auto;
 }
 
 .subcontract-item {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) 100px auto;
+  grid-template-columns: 18px auto minmax(0, 1.3fr) minmax(0, 0.9fr) 80px 95px 75px 110px minmax(0, 0.8fr) 100px auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 8px 12px;
   background: var(--card);
+  cursor: pointer;
+  font-size: var(--fs-md);
+  min-width: 900px;
+}
+
+.subcontract-card {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  cursor: pointer;
+  overflow: hidden;
+}
+
+.subcontract-item .mono {
+  font-size: inherit;
+}
+
+.subcontract-item .num {
+  text-align: right;
+}
+
+.subcontract-item--header {
+  background: #fafaff;
+  cursor: default;
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+  font-weight: 600;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 .subcontract-item:hover {
-  border-color: var(--primary);
+  background: var(--bg);
+}
+
+.subcontract-detail {
+  padding: 14px 16px 16px;
+  background: #fbfbff;
+  border-top: 1px dashed var(--border);
 }
 
 .subcontract-name {
-  font-size: 13px;
+  font-size: var(--fs-md);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -804,7 +847,7 @@ option {
 }
 
 .table-footer__count {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--ink-muted);
 }
 
@@ -820,7 +863,7 @@ option {
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--ink);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -849,7 +892,7 @@ option {
   border: none;
   background: none;
   color: var(--ink-muted);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -867,7 +910,7 @@ option {
 .pagination__ellipsis {
   padding: 0 4px;
   color: var(--ink-muted);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
 }
 
 /* ---------- Status chip ---------- */
@@ -876,7 +919,7 @@ option {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -891,7 +934,7 @@ option {
 
 .days-value {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 
@@ -937,7 +980,7 @@ option {
 
 .modal-header h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--fs-lg);
 }
 
 .modal-close {
@@ -967,9 +1010,69 @@ option {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--ink-muted);
   font-weight: 500;
+}
+
+/* ---------- Searchable select (Master contract picker) ---------- */
+
+.searchable-select {
+  position: relative;
+}
+
+.searchable-select__input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  color: var(--ink);
+  background: var(--card);
+}
+
+.searchable-select__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.searchable-select__panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 60;
+}
+
+.searchable-select__option {
+  padding: 9px 12px;
+  font-size: var(--fs-md);
+  cursor: pointer;
+}
+
+.searchable-select__option:hover {
+  background: var(--bg);
+}
+
+.searchable-select__option--active {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.searchable-select__empty {
+  padding: 12px;
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+  text-align: center;
 }
 
 .contract-form input,
@@ -979,7 +1082,7 @@ option {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   color: var(--ink);
   background: var(--card);
 }
@@ -993,7 +1096,7 @@ option {
   color: var(--red);
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: var(--fs-md);
   margin-bottom: 14px;
 }
 
@@ -1033,7 +1136,7 @@ option {
   background: var(--red);
   color: #fff;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   padding: 1px 5px;
   min-width: 16px;
@@ -1063,7 +1166,7 @@ option {
   padding: 14px 18px;
   border-bottom: 1px solid var(--border);
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--fs-md);
 }
 
 .notif-panel__actions {
@@ -1079,7 +1182,7 @@ option {
   padding: 28px 16px;
   text-align: center;
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-md);
 }
 
 .notif-item {
@@ -1099,7 +1202,7 @@ option {
 .notif-item__top {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--ink-muted);
   margin-bottom: 4px;
 }
@@ -1111,14 +1214,14 @@ option {
 }
 
 .notif-item__message {
-  font-size: 13px;
+  font-size: var(--fs-md);
   line-height: 1.4;
 }
 
 .notif-item__tag {
   display: inline-block;
   margin-top: 6px;
-  font-size: 10.5px;
+  font-size: var(--fs-2xs);
   padding: 2px 9px;
   border-radius: 999px;
   background: var(--green-bg);
@@ -1142,7 +1245,7 @@ option {
   color: #fff;
   padding: 10px 22px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: var(--fs-md);
   box-shadow: var(--shadow-lg);
   z-index: 60;
 }
@@ -1182,3 +1285,263 @@ option {
     right: -16px;
   }
 }
+
+/* ---------- Readability and layout refinement ----------
+   Drop-in styles for the supplied JSX components. No external font request;
+   uses an already-loaded Thai font, with system fallbacks. */
+body { font-size: 15px; line-height: 1.65; }
+button, input, select, textarea { font: inherit; }
+input::placeholder, textarea::placeholder { color: var(--ink-muted); opacity: 1; }
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--primary); outline-offset: 3px;
+}
+button:disabled { cursor: not-allowed; opacity: .55; }
+button { touch-action: manipulation; }
+.sidebar { padding: 12px 32px; gap: 40px; box-shadow: 0 2px 12px #18243b05; }
+.sidebar__logo { width: 46px; height: 46px; }
+.sidebar__brand-text { font-size: 16px; font-weight: 700; }
+.sidebar__nav { padding: 4px; border-radius: 12px; background: var(--bg); }
+.sidebar__nav-item { min-height: 42px; padding: 8px 18px; }
+.sidebar__nav-item--active, .sidebar__nav-item--active:hover {
+  background: var(--card); color: var(--primary); box-shadow: 0 1px 5px #18243b14;
+}
+.app-header, .app-main { max-width: 1760px; }
+.app-header { padding-top: 32px; gap: 20px; }
+.app-header__title { min-width: 0; gap: 6px; }
+.app-header h1 { line-height: 1.4; overflow-wrap: anywhere; }
+.app-header__actions { flex-wrap: wrap; }
+.app-main { padding-top: 24px; }
+.dashboard-page { gap: 24px; }
+.chart-grid { gap: 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.chart-card { min-width: 0; padding: 24px; border: 1px solid var(--border); }
+.chart-card__title { font-size: var(--fs-lg); line-height: 1.6; margin-bottom: 24px; }
+.recharts-text { fill: var(--ink-muted); font-family: var(--font-ui); font-size: 12px; }
+.recharts-default-tooltip { border-radius: 10px; line-height: 1.8; }
+.summary-strip { gap: 14px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.summary-block { min-width: 0; padding: 20px 16px; gap: 12px; flex-direction: column;
+  border: 1px solid var(--border); border-top: 3px solid var(--blue); }
+.summary-block--red, .summary-block--critical { border-top-color: var(--red); }
+.summary-block--urgent { border-top-color: var(--orange); }
+.summary-block--warn { border-top-color: var(--amber); }
+.summary-block--green { border-top-color: var(--green); }
+.summary-icon { width: 36px; height: 36px; border-radius: 10px; }
+.summary-block__text { min-width: 0; gap: 8px; }
+.summary-value { font-variant-numeric: tabular-nums; line-height: 1.2; }
+.summary-label { color: #44516a; font-weight: 600; line-height: 1.6; }
+.summary-pct { margin: 0; }
+.filter-bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 12px; padding: 20px; margin-bottom: 20px; background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.filter-search { grid-column: 1 / -1; min-width: 0; }
+.filter-bar select, .filter-bar input[type='text'] { width: 100%; min-width: 0;
+  min-height: 46px; border-radius: 10px; border-color: #c7d0df; }
+.filter-bar select { padding-right: 8px; }
+.filter-bar__add { margin: 0; white-space: nowrap; }
+.btn { min-height: 44px; border-radius: 10px; padding: 10px 18px;
+  transition: background-color .15s, border-color .15s; }
+.btn--primary { box-shadow: 0 3px 8px #5146b81c; }
+.link-btn { min-height: 36px; padding: 6px; border-radius: 6px; }
+.link-btn:hover { background: var(--primary-bg); }
+.link-btn--danger:hover { background: var(--red-bg); }
+.table-wrap { scrollbar-color: #a9b5c9 var(--bg); }
+.contracts-table { min-width: 1380px; }
+.contracts-table th { padding: 16px 12px; color: #4c5c76; background: #f0f3f9; font-size: 13px; }
+.contracts-table th.sortable-th--active { color: var(--primary); }
+.contracts-table td { padding: 18px 12px; line-height: 1.65; }
+.contracts-table td.num { white-space: normal; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.contracts-table .expand-toggle { padding-left: 6px; padding-right: 6px; }
+.contracts-table td.row-actions { display: table-cell; white-space: normal; }
+.row-actions .link-btn { font-size: 13px; padding: 5px 4px; }
+.contracts-table tbody tr:not(.detail-row):hover { background: #f5f4fc; }
+.contracts-table .row-expanded { background: var(--primary-bg); }
+.contracts-table .row-expanded > td:first-child { box-shadow: inset 3px 0 var(--primary); }
+.status-chip { white-space: normal; max-width: 100%; line-height: 1.5; padding: 5px 10px; }
+.mono, .days-value, .top-expiring__rank, .top-expiring__pill { font-variant-numeric: tabular-nums; }
+.detail-row td { padding: 24px 28px; background: #f7f8fc; }
+.detail-grid { gap: 20px 28px; }
+.detail-grid > div { min-width: 0; overflow-wrap: anywhere; }
+.detail-label { margin-bottom: 6px; font-weight: 600; }
+.subcontract-card { min-width: 1180px; }
+.subcontract-item { grid-template-columns: 18px 100px minmax(140px,1.5fr) minmax(100px,1fr) 85px 105px 90px 145px minmax(95px,1fr) 115px 50px; padding: 12px; }
+.subcontract-item > span { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.subcontract-item .type-badge { margin: 0; }
+.subcontract-name { overflow: visible; }
+.table-footer { gap: 16px; margin-top: 20px; }
+.pagination { flex-wrap: wrap; gap: 8px; }
+.pagination__pages { flex-wrap: wrap; gap: 4px; }
+.pagination__page { width: 38px; height: 38px; border-radius: 9px; }
+.pagination__btn { min-height: 40px; border-radius: 9px; }
+.pagination__page--active:hover { color: white; background: var(--primary-light); }
+.top-expiring__row { grid-template-columns: 28px minmax(0, 1.6fr) minmax(44px, 1fr) 108px; gap: 12px; padding: 14px 0; }
+.top-expiring__row--header { padding-top: 0; }
+/* Inline urgency colors are pale: keep readable pill text independent of bars. */
+.top-expiring__pill { color: var(--ink) !important; background: #f8f9fc; padding: 4px 10px; font-size: 12px; }
+.modal-overlay { padding: 32px 16px; background: #15213880; backdrop-filter: blur(3px); }
+.modal { max-width: 800px; border: 1px solid var(--border); }
+.modal--narrow { max-width: 460px; }
+.modal-header { padding: 22px 28px; gap: 16px; }
+.modal-close { width: 40px; height: 40px; flex-shrink: 0; border-radius: 10px; background: var(--bg); }
+.modal-close:hover { background: var(--red-bg); color: var(--red); }
+.contract-form { padding: 24px 28px 28px; }
+.form-grid { gap: 20px 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.contract-form label { min-width: 0; gap: 8px; color: #44516a; font-weight: 600; }
+.contract-form > label { margin-top: 20px; }
+.contract-form input, .contract-form select, .contract-form textarea {
+  width: 100%; min-width: 0; min-height: 46px; border-color: #c7d0df; font-weight: 400; }
+.contract-form textarea { min-height: 92px; line-height: 1.7; }
+.modal-actions { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 28px; }
+.searchable-select__option { padding: 12px 14px; line-height: 1.6; }
+.notif-bell { min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+.notif-panel { width: min(400px, calc(100vw - 32px)); max-height: min(560px, 75dvh); }
+.notif-panel__header { flex-wrap: wrap; gap: 8px; }
+.notif-list { min-height: 0; overscroll-behavior: contain; }
+.notif-item { padding: 18px; }
+.notif-item--unseen { box-shadow: inset 3px 0 var(--primary); }
+.notif-item__message { line-height: 1.7; overflow-wrap: anywhere; }
+.notif-item__top { gap: 12px; flex-wrap: wrap; }
+.toast { max-width: calc(100vw - 32px); border-radius: 12px; text-align: center; overflow-wrap: anywhere; }
+@media (max-width: 1200px) {
+  .summary-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .summary-block { flex-direction: row; }
+  .filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filter-bar__add { grid-column: 1 / -1; justify-self: end; }
+}
+@media (max-width: 900px) {
+  .chart-grid { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { gap: 20px; padding: 12px 16px; }
+  .app-header, .app-main { padding-left: 20px; padding-right: 20px; }
+}
+@media (max-width: 720px) {
+  .sidebar { flex-wrap: wrap; gap: 10px; position: relative; overflow: visible; }
+  .sidebar__brand-text { white-space: normal; font-size: 15px; }
+  .sidebar__nav { width: 100%; }
+  .sidebar__nav-item { flex: 1; justify-content: center; padding: 8px; }
+  .app-header { padding-top: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .app-header h1 { font-size: 24px; }
+  .app-main { padding-top: 20px; }
+  .app-header, .app-main { padding-left: 16px; padding-right: 16px; }
+  .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .summary-block { flex-direction: column; padding: 16px; }
+  .summary-value { font-size: 28px; }
+  .chart-card { padding: 18px 16px; }
+  .filter-bar { padding: 16px; }
+  .filter-bar__add { justify-self: stretch; }
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .form-wide { grid-column: 1 / -1; }
+  .modal-overlay { padding: 16px 10px; }
+  .modal-header { padding: 18px; }
+  .contract-form { padding: 20px 18px; }
+  .contract-form input, .contract-form select, .contract-form textarea,
+  .filter-bar input[type='text'], .filter-bar select { font-size: 16px; }
+  .notif-panel { position: fixed; right: 16px; top: auto; margin-top: 10px; }
+}
+@media (max-width: 640px) {
+  .top-expiring__row { grid-template-columns: 24px minmax(0, 1fr) 108px; gap: 10px; }
+  .top-expiring__row--header > span:nth-child(3) { display: none; }
+  .top-expiring__bar-track { display: none; }
+  .pagination { width: 100%; }
+}
+@media (max-width: 440px) {
+  .filter-bar { grid-template-columns: minmax(0, 1fr); }
+  .pagination { justify-content: space-between; }
+  .pagination__pages { order: 3; width: 100%; justify-content: center; }
+  .modal-actions .btn { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Contract details popup and independent Sub-contract disclosure. */
+.contract-expand-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; min-height: 36px; padding: 0; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--card); color: var(--primary); cursor: pointer;
+}
+.contract-expand-btn:hover { background: var(--primary-bg); }
+.contract-name-btn {
+  border: 0; padding: 0; background: transparent; color: inherit;
+  font: inherit; font-weight: 600; text-align: left; white-space: normal;
+  overflow-wrap: anywhere; cursor: pointer; line-height: inherit;
+}
+.contract-name-btn:hover { color: var(--primary); text-decoration: underline; }
+.contract-children__title { margin: 0 0 12px; font-size: var(--fs-md); }
+.contract-children__title span { color: var(--ink-muted); font-weight: 400; }
+.contract-children__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.contract-children__item {
+  display: grid; grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: center; gap: 16px; padding: 12px 16px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--card); cursor: pointer;
+}
+.contract-children__item:hover { background: var(--primary-bg); }
+.contract-children__item .type-badge { margin: 0; justify-self: start; }
+.contract-details-dialog {
+  width: min(800px, calc(100vw - 32px)); max-width: none;
+  max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  padding: 0; margin: auto; overflow-y: auto; overscroll-behavior: contain;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--card); color: var(--ink); box-shadow: var(--shadow-lg);
+  font-family: var(--font-ui); line-height: 1.65;
+}
+.contract-details-dialog::backdrop { background: #15213880; backdrop-filter: blur(3px); }
+.contract-details-dialog .modal-header { align-items: flex-start; }
+.contract-details-dialog__name { margin: 8px 0 0; color: var(--ink-muted); overflow-wrap: anywhere; }
+.contract-details-dialog__body { padding: 24px 28px; }
+.contract-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 0; }
+.contract-details-grid > div { min-width: 0; }
+.contract-details-grid dt { font-size: var(--fs-sm); color: var(--ink-muted); margin-bottom: 6px; }
+.contract-details-grid dd { margin: 0; font-size: var(--fs-md); white-space: pre-wrap; overflow-wrap: anywhere; }
+.contract-details-grid__wide { grid-column: 1 / -1; }
+@media (max-width: 640px) {
+  .contract-details-dialog__body { padding: 20px 18px; }
+  .contract-details-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
+
+/* Distinct alert palette, shared by summary cards and dashboard charts. */
+:root {
+  --alert-overdue: #7e22ce;
+  --alert-critical: #c62828;
+  --alert-urgent: #b85c00;
+  --alert-warning: #0369a1;
+  --alert-ok: #15803d;
+}
+.summary-block--blue { --summary-accent: #1d4ed8; --summary-tint: #eff6ff; --summary-edge: #bfdbfe; }
+.summary-block--red { --summary-accent: var(--alert-overdue); --summary-tint: #faf5ff; --summary-edge: #e9d5ff; }
+.summary-block--critical { --summary-accent: var(--alert-critical); --summary-tint: #fff1f2; --summary-edge: #fecdd3; }
+.summary-block--urgent { --summary-accent: var(--alert-urgent); --summary-tint: #fff7ed; --summary-edge: #fed7aa; }
+.summary-block--warn { --summary-accent: var(--alert-warning); --summary-tint: #f0f9ff; --summary-edge: #bae6fd; }
+.summary-block--green { --summary-accent: var(--alert-ok); --summary-tint: #f0fdf4; --summary-edge: #bbf7d0; }
+.summary-block {
+  background: var(--summary-tint, white);
+  border-color: var(--summary-edge, var(--border));
+  border-top: 4px solid var(--summary-accent, var(--primary));
+}
+.summary-block .summary-value { color: var(--summary-accent, var(--ink)); }
+.summary-block .summary-icon { background: white; border: 1px solid var(--summary-edge, var(--border)); }
+.summary-block .summary-label { color: #24354c; }
+.summary-block .summary-pct { color: #526079; }
+.summary-block--clickable:hover { border-color: var(--summary-accent); }
+.chart-card { border-color: #d5dfec; }
+.chart-card__title { border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; }
+.chart-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 10px 20px; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px solid var(--border); }
+.chart-legend li { display: inline-flex; align-items: center; gap: 8px; color: #334155; font-size: 13px; }
+.chart-legend__dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+/* Solid modal heading separates the overlay from the underlying dashboard. */
+.modal, .contract-details-dialog { border-color: #c2cfe0; box-shadow: 0 24px 80px #0f172a45; }
+.modal-header { background: #233c64; color: #fff; border-bottom-color: #233c64; border-radius: 13px 13px 0 0; }
+.modal-header h2 { color: #fff; }
+.modal-header .modal-close { color: #fff; background: #ffffff1f; border: 1px solid #ffffff55; }
+.modal-header .modal-close:hover { background: #ffffff36; color: #fff; }
+.modal-header .modal-close:focus-visible { outline-color: #fff; }
+.contract-details-dialog__name { color: #e0eaff; }
+.contract-details-dialog__body { background: #f1f5fa; }
+.contract-details-grid { gap: 14px; }
+.contract-details-grid > div { background: white; border: 1px solid #d8e2ef; border-radius: 10px; padding: 16px; }
+.contract-details-grid dt { color: #425873; font-weight: 600; }
+.contract-details-grid dd { color: #14263e; }
+.contract-details-grid__wide { background: #f0f6ff !important; border-left: 4px solid #487bb9 !important; }
+.contract-form { background: #f5f7fb; border-radius: 0 0 13px 13px; }
+.contract-form label { color: #334b68; }
+.contract-form input, .contract-form select, .contract-form textarea { background: white; border-color: #b7c7da; }
+.modal-overlay { background: #0f172a99; }
+.contract-details-dialog::backdrop { background: #0f172a99; }
