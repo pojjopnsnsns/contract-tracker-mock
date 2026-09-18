@@ -4,8 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --env-file-if-exists=.env server.js",
+    "test": "node --test test/*.test.js",
+    "user": "node --env-file-if-exists=.env scripts/user.js",
+    "check:data": "node --env-file-if-exists=.env scripts/check-data.js"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +19,8 @@
     "node-cron": "^4.6.0",
     "nodemailer": "^10.0.10",
     "pg": "^8.13.1"
+  },
+  "engines": {
+    "node": ">=22.9.0"
   }
 }

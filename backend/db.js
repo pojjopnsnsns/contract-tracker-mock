@@ -5,20 +5,24 @@ const { Pool, types } = require('pg');
 // DATE (oid 1082): return the raw 'YYYY-MM-DD' string instead of a JS Date,
 // which avoids local-timezone day-shift bugs when it round-trips through dayjs.
 types.setTypeParser(1082, (val) => val);
-// NUMERIC (oid 1700): return a float instead of pg's default string, so the
-// frontend can call .toLocaleString() on cost_amount directly.
-types.setTypeParser(1700, (val) => (val === null ? null : parseFloat(val)));
+// Keep PostgreSQL NUMERIC as strings to preserve decimal precision.
 
 const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 10, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30000,
   host: process.env.PGHOST || 'localhost',
   port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
   user: process.env.PGUSER || 'postgres',
-  password: process.env.PGPASSWORD || 'postgres',
+  password: process.env.PGPASSWORD,
   database: process.env.PGDATABASE || 'contract_tracker',
 });
 
 async function initSchema() {
-  await pool.query(`
+  const client = await pool.connect();
+  try {
+  await client.query('BEGIN');
+  await client.query('SELECT pg_advisory_xact_lock(71000)');
+  await client.query(`
     CREATE TABLE IF NOT EXISTS contracts (
       id SERIAL PRIMARY KEY,
       service_type TEXT,
@@ -47,7 +51,7 @@ async function initSchema() {
     ALTER TABLE contracts ADD COLUMN IF NOT EXISTS original_end_date DATE;
     -- Backfill for rows that existed before this column: best guess is their
     -- current end_date, since we have no earlier record for them.
-    UPDATE contracts SET original_end_date = end_date WHERE original_end_date IS NULL;
+    -- Baseline backfill is handled once by a versioned migration.
 
     CREATE TABLE IF NOT EXISTS notification_log (
       id SERIAL PRIMARY KEY,
@@ -62,6 +66,17 @@ async function initSchema() {
     ALTER TABLE notification_log ADD COLUMN IF NOT EXISTS threshold_days INTEGER;
     ALTER TABLE notification_log ADD COLUMN IF NOT EXISTS seen BOOLEAN DEFAULT false;
   `);
+  await client.query('CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())');
+  const migrationsPath = path.join(__dirname, 'migrations');
+  for (const name of fs.readdirSync(migrationsPath).filter(n=>n.endsWith('.sql')).sort()) {
+    const {rows} = await client.query('SELECT name FROM schema_migrations WHERE name=$1',[name]);
+    if (rows.length) continue;
+    await client.query(fs.readFileSync(path.join(migrationsPath,name),'utf8'));
+    await client.query('INSERT INTO schema_migrations(name) VALUES($1)',[name]);
+  }
+  await client.query('COMMIT');
+  } catch(err) { await client.query('ROLLBACK'); throw err; }
+  finally { client.release(); }
 }
 
 // --- Thai month abbreviation -> month number, for parsing the mock CSV dates ---
@@ -133,6 +148,9 @@ async function seedFromCsv(csvPath) {
   let inserted = 0;
   try {
     await client.query('BEGIN');
+    await client.query('SELECT pg_advisory_xact_lock(71001)');
+    const count = await client.query('SELECT COUNT(*)::int AS c FROM contracts');
+    if (count.rows[0].c > 0) { await client.query('COMMIT'); return; }
     const insertText = `
       INSERT INTO contracts
         (service_type, contract_name, country, partner, customer, note,
