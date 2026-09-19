@@ -65,7 +65,7 @@ services:
       - SMTP_PORT=587
       - SMTP_SECURE=false
       - SMTP_USER=guestaccess184@gmail.com
-      - SMTP_PASS=ualg zvxc ezzl erwp
+      - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=guestaccess184@gmail.com
       - ALERT_EMAIL_TO=nasakolthana.so@gmail.com
     depends_on:
