@@ -1,6 +1,7 @@
 const NAV_ITEMS = [
   { id: 'dashboard', icon: '◧', label: 'สรุปภาพรวม' },
   { id: 'contracts', icon: '☰', label: 'รายการสัญญา' },
+  { id: 'corrections', icon: '↺', label: 'ประวัติการแก้ไข' },
 ];
 
 export default function Topbar({ activePage, onNavigate }) {

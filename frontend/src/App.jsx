@@ -6,10 +6,14 @@ import ContractsTable from './components/ContractsTable.jsx';
 import ContractFormModal from './components/ContractFormModal.jsx';
 import NotificationBell from './components/NotificationBell.jsx';
 import LoginPage from './components/LoginPage.jsx';
+import CorrectionLog from './components/CorrectionLog.jsx';
+import ThemeToggle from './components/ThemeToggle.jsx';
+import { initialTheme, applyTheme } from './theme.js';
 
 const DashboardPage = lazy(() => import('./components/DashboardPage.jsx'));
 
 const PAGE_TITLES = {
+  corrections: { eyebrow: 'ประวัติสัญญา', title: 'ประวัติการแก้ไข' },
   contracts: { eyebrow: 'ทะเบียนสัญญา', title: 'ระบบติดตามการต่อสัญญา' },
   dashboard: { eyebrow: 'ภาพรวม', title: 'สรุปภาพรวมสัญญา' },
 };
@@ -17,6 +21,9 @@ const PAGE_TITLES = {
 const EMPTY_FILTERS = { search: '', status: '', alertLevel: '', serviceType: '', country: '' };
 
 export default function App() {
+  const [theme, setTheme] = useState(initialTheme);
+  useEffect(() => applyTheme(theme), [theme]);
+  const toggleTheme = () => setTheme(value => value === 'dark' ? 'light' : 'dark');
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
 
@@ -67,6 +74,7 @@ export default function App() {
     if (!user) return;
     (async () => {
       setLoading(true);
+      setError('');
       try {
         await Promise.all([loadContracts(), loadNotifications()]);
       } catch (err) {
@@ -185,7 +193,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <LoginPage onLoggedIn={setUser} />;
+    return <LoginPage onLoggedIn={setUser} theme={theme} onToggleTheme={toggleTheme} />;
   }
 
   const canWrite = user.role === 'admin' || user.role === 'editor';
@@ -207,6 +215,7 @@ export default function App() {
             <h1>{title}</h1>
           </div>
           <div className="app-header__actions">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
             {page === 'dashboard' && canWrite && (
               <button className="btn btn--primary" onClick={() => setModalContract({})}>
                 + เพิ่มสัญญาใหม่
@@ -230,6 +239,7 @@ export default function App() {
         </header>
 
         <main className="app-main">
+          {page === 'corrections' && <CorrectionLog contracts={contracts} />}
           {loading && <p className="loading-text">กำลังโหลดข้อมูล...</p>}
           {error && <p className="form-error">{error}</p>}
 

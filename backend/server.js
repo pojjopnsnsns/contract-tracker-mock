@@ -9,6 +9,8 @@ const { withAlert, NOTIFICATION_THRESHOLDS, CLOSED_STATUSES } = require('./alert
 const sendLineMessage = (...args) => require('./notifyLine').sendLineMessage(...args);
 const sendAlertEmail = (...args) => require('./notifyEmail').sendAlertEmail(...args);
 const { installAuth } = require('./auth');
+const { trustedOrigins } = require('./origins');
+const { correctionEntry } = require('./correctionLog');
 
 const app = express();
 app.disable('x-powered-by');
@@ -20,8 +22,14 @@ app.use((req,res,next)=>{
   next();
 });
 // Exact trusted frontend origins; cookies require credentials on cross-origin requests.
-const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
-app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : [process.env.PUBLIC_ORIGIN || 'http://localhost:4000'], credentials: true }));
+app.use(cors({
+  origin: trustedOrigins(),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+  preflightContinue: false,
+}));
 app.use(express.json({ limit: '100kb' }));
 
 const PORT = process.env.PORT || 4000;
@@ -375,6 +383,25 @@ app.post('/api/notifications/mark-all-seen',ah(async(req,res)=>{
     WHERE n.channel='app' AND n.renewal_cycle=c.renewal_cycle
     AND c.status NOT IN ('Renewed','Expired/Not renewed') ON CONFLICT DO NOTHING`,[req.user.id]);
   res.json({ok:true});
+}));
+app.get('/api/correction-log',ah(async(req,res)=>{
+  const contractId = req.query.contract_id === undefined ? null : positiveId(req.query.contract_id, 'contract_id');
+  const before = req.query.before;
+  if (before !== undefined && (typeof before !== 'string' || !/^[1-9]\d{0,18}$/.test(before) || BigInt(before) > 9223372036854775807n)) throw new HttpError(400, 'Invalid history cursor');
+  const action = req.query.action;
+  if (action !== undefined && !['INSERT', 'UPDATE', 'DELETE'].includes(action)) throw new HttpError(400, 'Invalid history action');
+  if (req.query.contract_name !== undefined && typeof req.query.contract_name !== 'string') throw new HttpError(400, 'Invalid contract name');
+  const name = req.query.contract_name?.trim() || null;
+  const { rows } = await pool.query(`SELECT * FROM contract_audit_log
+    WHERE ($1::integer IS NULL OR contract_id=$1)
+      AND ($2::bigint IS NULL OR id<$2)
+      AND ($3::text IS NULL OR action=$3)
+      AND ($4::text IS NULL OR strpos(lower(COALESCE(after_data->>'contract_name', '')), lower($4)) > 0
+        OR strpos(lower(COALESCE(before_data->>'contract_name', '')), lower($4)) > 0)
+      AND (action <> 'UPDATE' OR (before_data - 'updated_at') IS DISTINCT FROM (after_data - 'updated_at'))
+    ORDER BY id DESC LIMIT 26`, [contractId, before ?? null, action ?? null, name]);
+  const entries = rows.slice(0, 25).map(correctionEntry);
+  res.json({ entries, next_cursor: rows.length > 25 ? entries.at(-1).id : null });
 }));
 app.get('/api/audit',ah(async(req,res)=>{
   const id=req.query.contract_id ? positiveId(req.query.contract_id,'contract_id') : null;

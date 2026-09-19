@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { api } from '../api.js';
 import logo from '/public/business-contract-tracker-icon.svg';
 import './LoginPage.css';
+import ThemeToggle from './ThemeToggle.jsx';
 
-export default function LoginPage({ onLoggedIn }) {
+export default function LoginPage({ onLoggedIn, theme, onToggleTheme }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +26,7 @@ export default function LoginPage({ onLoggedIn }) {
 
   return (
     <div className="login-page">
+      <div className="login-theme"><ThemeToggle theme={theme} onToggle={onToggleTheme} /></div>
       <form className="login-card" onSubmit={handleSubmit} noValidate>
         <div className="login-card__brand">
           <img src={logo} alt="" className="login-card__logo" aria-hidden="true" />

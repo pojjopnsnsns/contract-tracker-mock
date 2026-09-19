@@ -36,6 +36,7 @@ async function request(path, options = {}) {
 
 export const api = {
   setUnauthorizedHandler,
+  correctionLog: (params = {}) => request(`/api/correction-log?${new URLSearchParams(params)}`),
 
   login: (username, password) => request('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
   logout: () => request('/api/auth/logout', { method: 'POST' }),

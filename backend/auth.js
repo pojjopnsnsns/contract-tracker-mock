@@ -1,6 +1,7 @@
 const { randomBytes, scrypt, timingSafeEqual, createHash } = require('node:crypto');
 const { promisify } = require('node:util');
 const derive = promisify(scrypt);
+const { trustedOrigins } = require('./origins');
 const digest = value => createHash('sha256').update(value).digest('hex');
 async function hashPassword(password) {
   if (typeof password !== 'string' || password.length < 12 || password.length > 256) throw new Error('Password must contain 12–256 characters');
@@ -15,18 +16,10 @@ async function verifyPassword(password, stored) {
   return expected.length === actual.length && timingSafeEqual(expected,actual);
 }
 function installAuth(app, pool, ah) {
-  const cookieOptions = { httpOnly:true, sameSite:'strict', secure:process.env.NODE_ENV==='production', path:'/' };
-  const publicOrigin = process.env.PUBLIC_ORIGIN || 'http://localhost:4000';
-  const trusted = new Set([publicOrigin,...(process.env.CORS_ORIGINS || '').split(',').map(s=>s.trim()).filter(Boolean)]);
-  //Allow try.cloudflare
-  function originAllowed(req) { 
-    const origin = req.get('Origin');
-    if (!origin) return false;
-    if (trusted.has(origin)) return true;
-    if (origin.endsWith('.trycloudflare.com')) return true;
-    if (origin.startsWith('http://localhost:')) return true;
-    return false;
-  }
+  const sameSite = process.env.SESSION_COOKIE_SAMESITE || 'strict';
+  if (!['strict', 'lax', 'none'].includes(sameSite)) throw new Error('Invalid SESSION_COOKIE_SAMESITE');
+  const cookieOptions = { httpOnly:true, sameSite, secure:sameSite==='none' || process.env.NODE_ENV==='production', path:'/' };
+  const trusted = new Set(trustedOrigins());
   function originAllowed(req) { return req.get('Origin') && trusted.has(req.get('Origin')); }
   app.post('/api/auth/login', ah(async(req,res)=>{
     if (!originAllowed(req)) return res.status(403).json({error:'Untrusted or missing Origin'});
@@ -57,7 +50,8 @@ function installAuth(app, pool, ah) {
     res.json({user:{id:user.id,username:user.username,role:user.role}});
   }));
   app.use('/api',ah(async(req,res,next)=>{
-    if (req.path==='/health') return next();
+    if (req.method==='OPTIONS' || req.path==='/health' ||
+        (req.method==='POST' && /^\/auth\/login\/?$/i.test(req.path))) return next();
     const cookie=(req.headers.cookie || '').split(';').map(s=>s.trim()).find(s=>s.startsWith('contract_session='));
     const token=cookie?.slice('contract_session='.length);
     if (!token || !/^[a-f0-9]{64}$/.test(token)) return res.status(401).json({error:'Login required',login_url:'/login'});
@@ -75,6 +69,7 @@ function installAuth(app, pool, ah) {
   }));
   // Read/seen actions are allowed for all authenticated users.
   app.use('/api',(req,res,next)=>{
+    if (req.method==='OPTIONS') return next();
     // Express routes are case-insensitive by default; permission checks must match.
     const routePath = req.path.toLowerCase();
     const adminOnly = req.method==='DELETE' || routePath.startsWith('/audit') || routePath.startsWith('/notify/') || routePath.includes('/baseline');
